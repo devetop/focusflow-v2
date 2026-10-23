@@ -50,7 +50,7 @@ src/
 - Do not alter task completed counts calculated in `OverviewDashboard.tsx` or `ProjectCard.tsx` when changing task filter views. Task completion status metrics must remain globally accurate based on raw task arrays.
 
 ### C. Storage & State Persistence (`storage.ts`)
-- All user modifications (Tasks, Projects, Focus Sessions) persist in `localStorage` under keys `focusflow_tasks_v2`, `focusflow_projects_v2`, `focusflow_timer_v2`, `focusflow_focus_sessions_v2`.
+- All user modifications (Tasks, Projects, Focus Sessions) persist in `localStorage` under keys `focusflow_tasks_v1`, `focusflow_projects_v1`, `focusflow_sessions_v1`, `focusflow_timer_v1`.
 - Do not change local storage schema or key names without explicit user request.
 
 ---
@@ -71,3 +71,8 @@ src/
    - Always confirm file paths before editing.
    - Never delete existing components, files, or data schemas without user confirmation.
    - Always verify changes with `npm run build` before finalizing tasks.
+
+- Data Backup & Portability (`storageService.exportData` and `storageService.importData`):
+  - **Export Payload**: `{ version: 1, exportedAt: ISO string, data: { tasks, projects, sessions, timer } }`. File output: `focusflow-backup-YYYY-MM-DD.json`.
+  - **Import Validation**: Strict schema checking for version (`version === 1`) and data domain array/object types. Write operations to `localStorage` are all-or-nothing (zero writes on validation error).
+  - **UI Triggers**: Export/Import action buttons located in `Sidebar.tsx` footer.
