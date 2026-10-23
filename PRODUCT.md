@@ -43,9 +43,9 @@
 - **Session History**: Records completed focus sessions with timestamps and durations.
 
 ### 4. Settings & Data Management
-- Export data to JSON file.
-- Import data from JSON backup with validation.
-- Reset/clear sample data.
+- **Full Data Export**: Compiles all tasks, projects, focus sessions, and timer state into a formatted JSON backup payload (`focusflow-backup-YYYY-MM-DD.json`). Uses native Blob and Object URL download triggers.
+- **Strict Data Import**: Supports restoring workspace state from valid `.json` snapshot files. Performs all-or-nothing validation against version schema (`version: 1`) and domain type structures. Rejecting invalid or corrupt schemas leaves active local data untouched.
+- **Safety Confirmation**: Displays a safety confirmation modal (`ConfirmDialog`) prior to overwriting active workspace state. Automatically refreshes application state live without requiring manual browser page reload.
 
 ---
 

@@ -28,6 +28,8 @@ export function App() {
   const [isProjectFormOpen, setIsProjectFormOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
 
+    const [importConfirmFile, setImportConfirmFile] = useState<File | null>(null);
+  const [importConfirmRaw, setImportConfirmRaw] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{
     isOpen: boolean;
     type: 'task' | 'project';
@@ -170,6 +172,42 @@ export function App() {
     showToast(`Timer set for "${task.title}"`);
   };
 
+    const handleExportData = () => {
+    storageService.exportData();
+    showToast('Workspace data exported', 'success');
+  };
+
+  const handleSelectImportFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const raw = e.target?.result as string;
+      if (raw) {
+        setImportConfirmFile(file);
+        setImportConfirmRaw(raw);
+      }
+    };
+    reader.onerror = () => {
+      showToast('Failed to read backup file', 'error');
+    };
+    reader.readAsText(file);
+  };
+
+  const handleConfirmImport = () => {
+    if (!importConfirmRaw) return;
+    const result = storageService.importData(importConfirmRaw);
+    if (result.ok) {
+      setTasks(storageService.getTasks());
+      setProjects(storageService.getProjects());
+      setSessions(storageService.getSessions());
+      setTimerState(storageService.getTimerState());
+      showToast('Workspace restored successfully!', 'success');
+    } else {
+      showToast(`Import failed: ${result.error}`, 'error');
+    }
+    setImportConfirmFile(null);
+    setImportConfirmRaw(null);
+  };
+
   const todayStr = getTodayDateString();
   const todayTasks = tasks.filter((t) => t.dueDate === todayStr && !t.completed);
 
@@ -182,8 +220,24 @@ export function App() {
         setIsTaskFormOpen(true);
       }}
       todayTaskCount={todayTasks.length}
+      onExportData={handleExportData}
+      onImportData={handleSelectImportFile}
     >
       <Toast toasts={toasts} onDismiss={handleDismissToast} />
+
+      <ConfirmDialog
+        isOpen={Boolean(importConfirmFile && importConfirmRaw)}
+        title="Restore Workspace Data?"
+        message={`Are you sure you want to restore workspace data from "${importConfirmFile?.name || 'backup'}"? This will replace your current tasks, projects, sessions, and timer state.`}
+        confirmLabel="Confirm & Restore"
+        cancelLabel="Cancel"
+        danger={true}
+        onConfirm={handleConfirmImport}
+        onCancel={() => {
+          setImportConfirmFile(null);
+          setImportConfirmRaw(null);
+        }}
+      />
 
       <ConfirmDialog
         isOpen={deleteConfirm.isOpen}
