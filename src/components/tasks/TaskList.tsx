@@ -32,14 +32,13 @@ export const TaskList: React.FC<TaskListProps> = ({
   const todayStr = getTodayDateString();
 
   const filteredTasks = tasks.filter((task) => {
-    if (activeTab === 'today') {
-      if (task.dueDate !== todayStr) return false;
-    } else if (activeTab === 'upcoming') {
-      if (task.dueDate <= todayStr || task.completed) return false;
-    } else if (activeTab === 'overdue') {
-      if (task.dueDate >= todayStr || task.completed) return false;
-    } else if (activeTab === 'completed') {
+    if (activeTab === 'completed') {
       if (!task.completed) return false;
+    } else {
+      if (task.completed) return false;
+      if (activeTab === 'today' && task.dueDate !== todayStr) return false;
+      if (activeTab === 'upcoming' && task.dueDate <= todayStr) return false;
+      if (activeTab === 'overdue' && task.dueDate >= todayStr) return false;
     }
 
     if (searchQuery.trim()) {
