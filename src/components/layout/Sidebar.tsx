@@ -1,12 +1,14 @@
 import React from 'react';
 import type { ViewMode } from '../../types';
-import { LayoutDashboard, CheckSquare, FolderKanban, Timer, CheckCircle, Plus } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, FolderKanban, Timer, CheckCircle, Plus, Download, Upload } from 'lucide-react';
 
 interface SidebarProps {
   currentView: ViewMode;
   onNavigate: (view: ViewMode) => void;
   onAddTask: () => void;
   todayCount: number;
+  onExportData?: () => void;
+  onImportData?: (file: File) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -14,7 +16,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onNavigate,
   onAddTask,
   todayCount,
+  onExportData,
+  onImportData,
 }) => {
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onImportData) {
+      onImportData(file);
+    }
+    if (e.target) {
+      e.target.value = '';
+    }
+  };
   const navItems = [
     { id: 'overview' as ViewMode, label: 'Overview', icon: LayoutDashboard },
     { id: 'tasks' as ViewMode, label: 'My Tasks', icon: CheckSquare },
@@ -74,6 +89,39 @@ export const Sidebar: React.FC<SidebarProps> = ({
             );
           })}
         </nav>
+      </div>
+
+      {/* Data Export / Import Actions */}
+      <div className="flex flex-col gap-2 pt-2 border-t border-[#F0EDE8]">
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          accept="application/json"
+          className="hidden"
+        />
+        <div className="flex items-center gap-2">
+          {onExportData && (
+            <button
+              onClick={onExportData}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[#F5F2EE] hover:bg-[#EAE5E0] text-[#2A2538] text-xs font-semibold transition-colors"
+              title="Export workspace data to JSON"
+            >
+              <Download className="w-3.5 h-3.5 text-[#7657D9]" />
+              <span>Export</span>
+            </button>
+          )}
+          {onImportData && (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[#F5F2EE] hover:bg-[#EAE5E0] text-[#2A2538] text-xs font-semibold transition-colors"
+              title="Import workspace data from JSON file"
+            >
+              <Upload className="w-3.5 h-3.5 text-[#7657D9]" />
+              <span>Import</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Bottom Summary Pill */}

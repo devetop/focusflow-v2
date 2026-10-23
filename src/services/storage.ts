@@ -137,6 +137,55 @@ const DEFAULT_SESSIONS: FocusSession[] = [
   },
 ];
 
+
+function isObject(val: unknown): val is Record<string, unknown> {
+  return typeof val === 'object' && val !== null;
+}
+
+function isValidTask(task: unknown): task is Task {
+  if (!isObject(task)) return false;
+  const { id, title, completed, priority, dueDate, estimatedMinutes, createdAt } = task;
+  if (typeof id !== 'string' || typeof title !== 'string' || typeof completed !== 'boolean') return false;
+  if (priority !== 'low' && priority !== 'medium' && priority !== 'high') return false;
+  if (typeof dueDate !== 'string' || typeof estimatedMinutes !== 'number' || typeof createdAt !== 'string') return false;
+  return true;
+}
+
+function isValidProject(project: unknown): project is Project {
+  if (!isObject(project)) return false;
+  const { id, name, color, icon, createdAt } = project;
+  if (
+    typeof id !== 'string' ||
+    typeof name !== 'string' ||
+    typeof color !== 'string' ||
+    typeof icon !== 'string' ||
+    typeof createdAt !== 'string'
+  )
+    return false;
+  return true;
+}
+
+function isValidSession(session: unknown): session is FocusSession {
+  if (!isObject(session)) return false;
+  const { id, durationMinutes, completedAt, mode } = session;
+  if (typeof id !== 'string' || typeof durationMinutes !== 'number' || typeof completedAt !== 'string') return false;
+  if (mode !== 'focus' && mode !== 'shortBreak' && mode !== 'longBreak') return false;
+  return true;
+}
+
+function isValidTimerState(timer: unknown): timer is TimerState {
+  if (!isObject(timer)) return false;
+  const { mode, timeLeft, isRunning, totalSessionsCompletedToday } = timer;
+  if (mode !== 'focus' && mode !== 'shortBreak' && mode !== 'longBreak') return false;
+  if (
+    typeof timeLeft !== 'number' ||
+    typeof isRunning !== 'boolean' ||
+    typeof totalSessionsCompletedToday !== 'number'
+  )
+    return false;
+  return true;
+}
+
 export const storageService = {
   // Tasks
   getTasks(): Task[] {
@@ -299,5 +348,83 @@ export const storageService = {
 
   saveTimerState(state: TimerState): void {
     localStorage.setItem(STORAGE_KEYS.TIMER, JSON.stringify(state));
+  },
+  exportData(): void {
+    const tasks = this.getTasks();
+    const projects = this.getProjects();
+    const sessions = this.getSessions();
+    const timer = this.getTimerState();
+
+    const payload = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      data: {
+        tasks,
+        projects,
+        sessions,
+        timer,
+      },
+    };
+
+    const jsonStr = JSON.stringify(payload, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const todayDate = new Date().toISOString().split('T')[0];
+    const filename = `focusflow-backup-${todayDate}.json`;
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  },
+
+  importData(raw: string): { ok: true } | { ok: false; error: string } {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      return { ok: false, error: 'Invalid JSON format.' };
+    }
+
+    if (!isObject(parsed)) {
+      return { ok: false, error: 'Backup payload must be a JSON object.' };
+    }
+
+    if (parsed.version !== 1) {
+      return { ok: false, error: 'Unsupported schema version. Expected version 1.' };
+    }
+
+    if (!isObject(parsed.data)) {
+      return { ok: false, error: 'Missing or invalid "data" object in backup file.' };
+    }
+
+    const { tasks, projects, sessions, timer } = parsed.data;
+
+    if (!Array.isArray(tasks) || !tasks.every(isValidTask)) {
+      return { ok: false, error: 'Invalid task data structure in backup file.' };
+    }
+
+    if (!Array.isArray(projects) || !projects.every(isValidProject)) {
+      return { ok: false, error: 'Invalid project data structure in backup file.' };
+    }
+
+    if (!Array.isArray(sessions) || !sessions.every(isValidSession)) {
+      return { ok: false, error: 'Invalid focus session data structure in backup file.' };
+    }
+
+    if (!isValidTimerState(timer)) {
+      return { ok: false, error: 'Invalid timer state structure in backup file.' };
+    }
+
+    localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
+    localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
+    localStorage.setItem(STORAGE_KEYS.SESSIONS, JSON.stringify(sessions));
+    localStorage.setItem(STORAGE_KEYS.TIMER, JSON.stringify(timer));
+
+    return { ok: true };
   },
 };
