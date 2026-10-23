@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import type { Task, TimerMode, TimerState, FocusSession } from '../../types';
 import { Play, Pause, RotateCcw, SkipForward, CheckCircle, Volume2, Flame } from 'lucide-react';
+import { Select } from '../ui/Select';
 
 interface PomodoroTimerProps {
   tasks: Task[];
@@ -284,13 +285,13 @@ export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
           </button>
         </div>
 
-        <select
+        <Select
           value={activeTask?.id || ''}
           onChange={(e) => {
             const selected = tasks.find((t) => t.id === e.target.value);
             onSelectTask(selected);
           }}
-          className="w-full px-4 py-2.5 rounded-2xl bg-[#FCFAF8] border border-[#F0EDE8] focus:border-[#7657D9] focus:outline-none text-xs font-semibold text-[#2A2538]"
+          aria-label="Link Focus Session To Task"
         >
           <option value="">-- General Focus Session (No specific task) --</option>
           {availableTasks.map((t) => (
@@ -298,7 +299,7 @@ export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
               {t.title} ({t.estimatedMinutes}m est)
             </option>
           ))}
-        </select>
+        </Select>
       </div>
     </div>
   );

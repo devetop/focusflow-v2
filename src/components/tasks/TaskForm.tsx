@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Task, Project, Priority } from '../../types';
 import { X, Calendar, Clock, Tag, Folder } from 'lucide-react';
+import { Select } from '../ui/Select';
 
 interface TaskFormProps {
   isOpen: boolean;
@@ -194,10 +195,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                 <Folder className="w-3.5 h-3.5 text-[#7657D9]" />
                 Project
               </label>
-              <select
+              <Select
                 value={projectId}
                 onChange={(e) => setProjectId(e.target.value)}
-                className="w-full px-3 py-2 rounded-2xl bg-[#FCFAF8] border border-[#F0EDE8] focus:border-[#7657D9] focus:outline-none text-xs font-semibold text-[#2A2538]"
+                aria-label="Assign Project"
               >
                 <option value="">No Project (Unassigned)</option>
                 {projects.map((proj) => (
@@ -205,7 +206,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                     {proj.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
 
             <div>

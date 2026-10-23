@@ -3,6 +3,7 @@ import type { Task, Project, TaskFilterTab, Priority } from '../../types';
 import { getTodayDateString } from '../../utils/date';
 import { TaskItem } from './TaskItem';
 import { Search, Filter, ArrowUpDown, CheckCircle2 } from 'lucide-react';
+import { Select } from '../ui/Select';
 
 interface TaskListProps {
   tasks: Task[];
@@ -88,47 +89,44 @@ export const TaskList: React.FC<TaskListProps> = ({
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
-          <div className="flex items-center gap-1 bg-[#FCFAF8] px-2.5 py-1.5 rounded-xl border border-[#F0EDE8]">
-            <Filter className="w-3.5 h-3.5 text-[#9E98AB]" />
-            <select
-              value={selectedProjectId}
-              onChange={(e) => setSelectedProjectId(e.target.value)}
-              className="bg-transparent text-xs font-semibold text-[#2A2538] focus:outline-none"
-            >
-              <option value="all">All Projects</option>
-              {projects.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Select
+            icon={<Filter className="w-3.5 h-3.5" />}
+            value={selectedProjectId}
+            onChange={(e) => setSelectedProjectId(e.target.value)}
+            aria-label="Filter by project"
+            containerClassName="w-auto"
+          >
+            <option value="all">All Projects</option>
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </Select>
 
-          <div className="flex items-center gap-1 bg-[#FCFAF8] px-2.5 py-1.5 rounded-xl border border-[#F0EDE8]">
-            <select
-              value={selectedPriority}
-              onChange={(e) => setSelectedPriority(e.target.value)}
-              className="bg-transparent text-xs font-semibold text-[#2A2538] focus:outline-none"
-            >
-              <option value="all">All Priorities</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
-            </select>
-          </div>
+          <Select
+            value={selectedPriority}
+            onChange={(e) => setSelectedPriority(e.target.value)}
+            aria-label="Filter by priority"
+            containerClassName="w-auto"
+          >
+            <option value="all">All Priorities</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </Select>
 
-          <div className="flex items-center gap-1 bg-[#FCFAF8] px-2.5 py-1.5 rounded-xl border border-[#F0EDE8]">
-            <ArrowUpDown className="w-3.5 h-3.5 text-[#9E98AB]" />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'dueDate' | 'priority' | 'createdAt')}
-              className="bg-transparent text-xs font-semibold text-[#2A2538] focus:outline-none"
-            >
-              <option value="dueDate">Sort: Due Date</option>
-              <option value="priority">Sort: Priority</option>
-              <option value="createdAt">Sort: Created Date</option>
-            </select>
-          </div>
+          <Select
+            icon={<ArrowUpDown className="w-3.5 h-3.5" />}
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as 'dueDate' | 'priority' | 'createdAt')}
+            aria-label="Sort tasks"
+            containerClassName="w-auto"
+          >
+            <option value="dueDate">Sort: Due Date</option>
+            <option value="priority">Sort: Priority</option>
+            <option value="createdAt">Sort: Created Date</option>
+          </Select>
         </div>
       </div>
 
