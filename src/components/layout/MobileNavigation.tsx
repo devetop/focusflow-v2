@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ViewMode } from '../../types';
-import { LayoutDashboard, CheckSquare, FolderKanban, Timer, CheckCircle, Plus } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, FolderKanban, Timer, CheckCircle, Settings, Plus } from 'lucide-react';
 
 interface MobileNavigationProps {
   currentView: ViewMode;
@@ -19,6 +19,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
     { id: 'projects' as ViewMode, label: 'Projects', icon: FolderKanban },
     { id: 'timer' as ViewMode, label: 'Timer', icon: Timer },
     { id: 'completed' as ViewMode, label: 'Completed', icon: CheckCircle },
+    { id: 'settings' as ViewMode, label: 'Settings', icon: Settings },
   ];
 
   return (

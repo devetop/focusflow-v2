@@ -56,20 +56,28 @@ h1, h2, h3, h4, h5, h6 {
 
 ### A. Navigation & Tabs
 - **Filter Tabs**: Active tab background `#7657D9` with white text (`text-white`), `rounded-2xl` pill shape. Inactive tab hover state uses `#F5F2EE` with text `#2A2538`.
-- **Sidebar**: Sticky left panel with smooth transitions, subtle icons (`lucide-react`), and active indicator highlight.
+- **Sidebar**: Sticky left panel with smooth transitions, subtle icons (`lucide-react`), and active indicator highlight (`bg-[#EFEBFC] text-[#7657D9]`, `rounded-2xl`).
+- **Nav Parity**: Sidebar and mobile navigation must expose the same view list (Overview, My Tasks, Projects, Focus Timer, Completed, Settings).
 
 ### B. Cards & Containers
 - Standard cards use `bg-white`, `border border-[#F0EDE8]`, `rounded-2xl` or `rounded-3xl`, and micro shadows (`shadow-2xs`).
 - Interactive items feature hover state border transitions (`hover:border-[#7657D9]/30` or similar).
 
 ### C. Buttons & Inputs
-- **Primary Button**: `bg-[#7657D9] hover:bg-[#6645C8] text-white rounded-xl text-xs font-bold px-4 py-2.5 transition-all shadow-xs`
-- **Search & Select Inputs**: `bg-[#FCFAF8] border border-[#F0EDE8] text-[#2A2538] focus:border-[#7657D9] rounded-xl text-xs`
+- **Primary Button**: `bg-[#7657D9] hover:bg-[#6645C8] text-white rounded-full text-xs font-bold px-4 py-2.5 transition-all shadow-md shadow-[#7657D9]/20 active:scale-95`
+- **Secondary / Cancel Button**: `rounded-full text-[#6D677D] hover:bg-[#F5F2EE]`
+- **Search & Select Inputs**: `bg-[#FCFAF8] border border-[#F0EDE8] text-[#2A2538] focus:border-[#7657D9] rounded-xl text-xs`. Settings profile input uses the same colors with `rounded-2xl` and `text-sm font-semibold`.
+- **Validation Feedback**: Inline error text below the field, `text-xs font-semibold text-red-500`.
 
 ### D. Badges & Priority Pillars
 - **High Priority**: Peach badge (`bg-[#FDF1EB] text-[#D96B3D]`)
 - **Medium Priority**: Yellow badge (`bg-[#FEF9E8] text-[#B88714]`)
 - **Low Priority**: Mint badge (`bg-[#EBF8F2] text-[#2E9468]`)
+
+### E. Settings View
+- Two-column card grid on desktop (`grid-cols-1 md:grid-cols-2`), single column on mobile.
+- Each card: white surface, `rounded-3xl`, header row with a `w-10 h-10 rounded-2xl bg-[#EFEBFC]` icon tile followed by title + muted subtitle, separated by a `border-b border-[#F0EDE8]`.
+- Actions are right-aligned pill buttons; destructive/irreversible actions (import) require `ConfirmDialog` confirmation.
 
 ---
 

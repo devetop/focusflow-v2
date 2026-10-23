@@ -1,10 +1,11 @@
-import type { Task, Project, FocusSession, TimerState } from '../types';
+import type { Task, Project, FocusSession, TimerState, UserProfile } from '../types';
 
 const STORAGE_KEYS = {
   TASKS: 'focusflow_tasks_v1',
   PROJECTS: 'focusflow_projects_v1',
   SESSIONS: 'focusflow_sessions_v1',
   TIMER: 'focusflow_timer_v1',
+  PROFILE: 'focusflow_profile_v1',
 };
 
 // Seed Data helper
@@ -426,5 +427,24 @@ export const storageService = {
     localStorage.setItem(STORAGE_KEYS.TIMER, JSON.stringify(timer));
 
     return { ok: true };
+  },
+  // Profile
+  getProfile(): UserProfile {
+    const data = localStorage.getItem(STORAGE_KEYS.PROFILE);
+    const defaultProfile: UserProfile = { name: 'Alex' };
+    if (!data) return defaultProfile;
+    try {
+      const parsed = JSON.parse(data);
+      if (parsed && typeof parsed.name === 'string') {
+        return parsed;
+      }
+      return defaultProfile;
+    } catch {
+      return defaultProfile;
+    }
+  },
+
+  saveProfile(profile: UserProfile): void {
+    localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(profile));
   },
 };

@@ -8,8 +8,6 @@ interface AppShellProps {
   onNavigate: (view: ViewMode) => void;
   onAddTask: () => void;
   todayTaskCount: number;
-  onExportData?: () => void;
-  onImportData?: (file: File) => void;
   children: React.ReactNode;
 }
 
@@ -18,8 +16,6 @@ export const AppShell: React.FC<AppShellProps> = ({
   onNavigate,
   onAddTask,
   todayTaskCount,
-  onExportData,
-  onImportData,
   children,
 }) => {
   return (
@@ -30,8 +26,6 @@ export const AppShell: React.FC<AppShellProps> = ({
         onNavigate={onNavigate}
         onAddTask={onAddTask}
         todayCount={todayTaskCount}
-        onExportData={onExportData}
-        onImportData={onImportData}
       />
 
       {/* Main Content Area */}

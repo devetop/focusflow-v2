@@ -1,6 +1,10 @@
 export type Priority = 'low' | 'medium' | 'high';
 
-export type ViewMode = 'overview' | 'tasks' | 'projects' | 'timer' | 'completed';
+export type ViewMode = 'overview' | 'tasks' | 'projects' | 'timer' | 'completed' | 'settings';
+
+export interface UserProfile {
+  name: string;
+}
 
 export type TaskFilterTab = 'all' | 'today' | 'upcoming' | 'overdue' | 'completed';
 

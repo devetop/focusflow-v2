@@ -42,14 +42,23 @@
 - **Task Integration**: Optionally attach the timer to a specific active task to log dedicated focus sessions.
 - **Session History**: Records completed focus sessions with timestamps and durations.
 
-### 4. Settings & Data Management
-- **Full Data Export**: Compiles all tasks, projects, focus sessions, and timer state into a formatted JSON backup payload (`focusflow-backup-YYYY-MM-DD.json`). Uses native Blob and Object URL download triggers.
+### 4. Settings & Data Management (`SettingsView.tsx`)
+- **Profile Details**: Edit the display name used in the Overview greeting. Trimmed, 1–40 characters, defaults to `'Alex'`. Saved immediately to `localStorage` (`focusflow_profile_v1`) with a toast confirmation.
+- **Full Data Export**: Compiles all tasks, projects, focus sessions, and timer state into a formatted JSON backup payload (`focusflow-backup-YYYY-MM-DD.json`). Uses native Blob and Object URL download triggers. Profile data is intentionally excluded.
 - **Strict Data Import**: Supports restoring workspace state from valid `.json` snapshot files. Performs all-or-nothing validation against version schema (`version: 1`) and domain type structures. Rejecting invalid or corrupt schemas leaves active local data untouched.
-- **Safety Confirmation**: Displays a safety confirmation modal (`ConfirmDialog`) prior to overwriting active workspace state. Automatically refreshes application state live without requiring manual browser page reload.
+- **Safety Confirmation**: Displays a safety confirmation modal (`ConfirmDialog`) prior to overwriting active workspace state. Automatically refreshes application state live (including profile) without requiring manual browser page reload.
+- **Entry Point**: Reached via the `settings` view in `Sidebar.tsx` and `MobileNavigation.tsx`; backup/restore actions live here, not in the sidebar footer.
 
 ---
 
 ## 4. Key Data Schemas
+
+### UserProfile
+```typescript
+interface UserProfile {
+  name: string;             // Trimmed, 1–40 characters. Default: 'Alex'
+}
+```
 
 ### Task
 ```typescript
@@ -97,5 +106,6 @@ interface FocusSession {
 ## 5. Invariants & Product Guarantees
 
 1. **Separation of Active vs Completed Tasks**: Marking a task as completed immediately removes it from active views ("All", "Today", "Upcoming", "Overdue") and moves it exclusively into "Completed". Reopening (uncompleting) a task immediately restores it to active views.
-2. **Offline Local Storage**: All state is initialized from and saved to browser `localStorage` using keys prefixed with `focusflow_`.
+2. **Offline Local Storage**: All state is initialized from and saved to browser `localStorage` using keys prefixed with `focusflow_`. Profile data uses `focusflow_profile_v1` and is not part of export/import payloads.
 3. **Responsive SPA Layout**: Sidebar navigation for desktop and bottom/drawer navigation for mobile views.
+4. **Single Greeting Source**: The Overview greeting always uses the persisted profile name; never hardcode a display name in components.

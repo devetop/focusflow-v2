@@ -11,6 +11,7 @@ import { ProjectCard } from '../projects/ProjectCard';
 import { CheckCircle2, Flame, ArrowRight, Sparkles, Plus, Play } from 'lucide-react';
 
 interface OverviewDashboardProps {
+  profileName: string;
   tasks: Task[];
   projects: Project[];
   sessions: FocusSession[];
@@ -38,6 +39,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
   onEditProject,
   onDeleteProject,
   onSelectProject,
+  profileName,
 }) => {
   const todayStr = getTodayDateString();
 
@@ -84,7 +86,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
             {formattedDate}
           </span>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-[#2A2538] tracking-tight mt-0.5">
-            {getGreeting()}, Alex 👋
+            {getGreeting()}, {profileName} 👋
           </h1>
         </div>
 

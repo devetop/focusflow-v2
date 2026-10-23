@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { Task, Project, FocusSession, TimerState, ViewMode, ToastMessage } from './types';
+import type { Task, Project, FocusSession, TimerState, ViewMode, ToastMessage, UserProfile } from './types';
 import { storageService } from './services/storage';
 import { getTodayDateString } from './utils/date';
 import { AppShell } from './components/layout/AppShell';
@@ -12,10 +12,12 @@ import { TaskForm } from './components/tasks/TaskForm';
 import { ProjectCard } from './components/projects/ProjectCard';
 import { ProjectForm } from './components/projects/ProjectForm';
 import { PomodoroTimer } from './components/timer/PomodoroTimer';
+import { SettingsView } from './components/settings/SettingsView';
 import { Plus } from 'lucide-react';
 
 export function App() {
   const [currentView, setCurrentView] = useState<ViewMode>('overview');
+  const [profile, setProfile] = useState<UserProfile>({ name: 'Alex' });
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [sessions, setSessions] = useState<FocusSession[]>([]);
@@ -45,6 +47,7 @@ export function App() {
     setProjects(storageService.getProjects());
     setSessions(storageService.getSessions());
     setTimerState(storageService.getTimerState());
+    setProfile(storageService.getProfile());
   }, []);
 
   const showToast = (message: string, type: ToastMessage['type'] = 'success', actionLabel?: string, onAction?: () => void) => {
@@ -56,6 +59,12 @@ export function App() {
       onAction,
     };
     setToasts((prev) => [newToast, ...prev]);
+  };
+
+  const handleSaveProfile = (newProfile: UserProfile) => {
+    storageService.saveProfile(newProfile);
+    setProfile(newProfile);
+    showToast("Profile updated");
   };
 
   const handleDismissToast = (id: string) => {
@@ -200,6 +209,7 @@ export function App() {
       setProjects(storageService.getProjects());
       setSessions(storageService.getSessions());
       setTimerState(storageService.getTimerState());
+    setProfile(storageService.getProfile());
       showToast('Workspace restored successfully!', 'success');
     } else {
       showToast(`Import failed: ${result.error}`, 'error');
@@ -220,8 +230,6 @@ export function App() {
         setIsTaskFormOpen(true);
       }}
       todayTaskCount={todayTasks.length}
-      onExportData={handleExportData}
-      onImportData={handleSelectImportFile}
     >
       <Toast toasts={toasts} onDismiss={handleDismissToast} />
 
@@ -261,6 +269,7 @@ export function App() {
 
       {currentView === 'overview' && (
         <OverviewDashboard
+          profileName={profile.name}
           tasks={tasks}
           projects={projects}
           sessions={sessions}
@@ -392,6 +401,15 @@ export function App() {
             initialTab="completed"
           />
         </div>
+      )}
+
+      {currentView === 'settings' && (
+        <SettingsView
+          profile={profile}
+          onSaveProfile={handleSaveProfile}
+          onExportData={handleExportData}
+          onImportData={handleSelectImportFile}
+        />
       )}
 
       <TaskForm
