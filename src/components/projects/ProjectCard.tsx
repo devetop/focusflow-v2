@@ -26,7 +26,10 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   return (
-    <div className="group relative bg-white rounded-3xl p-6 border border-[#F0EDE8] shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between min-h-[200px]">
+    <div
+      onClick={() => onSelectProject(project.id)}
+      className="group relative bg-white rounded-3xl p-6 border border-[#F0EDE8] shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between min-h-[200px] cursor-pointer"
+    >
       <div>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -46,9 +49,12 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             </div>
           </div>
 
-          <div className="relative">
+          <div className="relative" onClick={(e) => e.stopPropagation()}>
             <button
-              onClick={() => setShowMenu(!showMenu)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowMenu(!showMenu);
+              }}
               className="p-1.5 rounded-xl text-[#9E98AB] hover:text-[#2A2538] hover:bg-[#F5F2EE] transition-colors"
               aria-label="Project actions"
             >
@@ -61,7 +67,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
                 onMouseLeave={() => setShowMenu(false)}
               >
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setShowMenu(false);
                     onEdit(project);
                   }}
@@ -71,7 +78,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
                   Edit Project
                 </button>
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setShowMenu(false);
                     onDelete(project);
                   }}
@@ -109,7 +117,10 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         </div>
 
         <button
-          onClick={() => onSelectProject(project.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelectProject(project.id);
+          }}
           className="flex items-center justify-between w-full pt-3 border-t border-[#F0EDE8] text-xs font-bold text-[#7657D9] hover:text-[#6645C8] transition-colors"
         >
           <span>View All Tasks</span>

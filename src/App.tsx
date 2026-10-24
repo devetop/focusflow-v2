@@ -17,6 +17,7 @@ import { Plus } from 'lucide-react';
 
 export function App() {
   const [currentView, setCurrentView] = useState<ViewMode>('overview');
+  const [taskProjectFilter, setTaskProjectFilter] = useState<string>('all');
   const [profile, setProfile] = useState<UserProfile>({ name: 'Alex' });
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -218,13 +219,18 @@ export function App() {
     setImportConfirmRaw(null);
   };
 
+  const handleNavigate = (view: ViewMode) => {
+    setTaskProjectFilter('all');
+    setCurrentView(view);
+  };
+
   const todayStr = getTodayDateString();
   const todayTasks = tasks.filter((t) => t.dueDate === todayStr && !t.completed);
 
   return (
     <AppShell
       currentView={currentView}
-      onNavigate={setCurrentView}
+      onNavigate={handleNavigate}
       onAddTask={() => {
         setEditingTask(null);
         setIsTaskFormOpen(true);
@@ -273,7 +279,7 @@ export function App() {
           tasks={tasks}
           projects={projects}
           sessions={sessions}
-          onNavigate={setCurrentView}
+          onNavigate={handleNavigate}
           onAddTask={() => {
             setEditingTask(null);
             setIsTaskFormOpen(true);
@@ -290,7 +296,8 @@ export function App() {
             setIsProjectFormOpen(true);
           }}
           onDeleteProject={handleDeleteProjectPrompt}
-          onSelectProject={() => {
+          onSelectProject={(projectId) => {
+            setTaskProjectFilter(projectId);
             setCurrentView('tasks');
           }}
         />
@@ -307,6 +314,7 @@ export function App() {
             }}
           />
           <TaskList
+            key={taskProjectFilter}
             tasks={tasks}
             projects={projects}
             onToggleComplete={handleToggleComplete}
@@ -316,6 +324,7 @@ export function App() {
             }}
             onDelete={handleDeleteTaskPrompt}
             onStartTimer={handleStartTimerForTask}
+            initialProjectId={taskProjectFilter}
           />
         </div>
       )}
@@ -343,7 +352,8 @@ export function App() {
                   setIsProjectFormOpen(true);
                 }}
                 onDelete={handleDeleteProjectPrompt}
-                onSelectProject={() => {
+                onSelectProject={(projectId) => {
+                  setTaskProjectFilter(projectId);
                   setCurrentView('tasks');
                 }}
               />
