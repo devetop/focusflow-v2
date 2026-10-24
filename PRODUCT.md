@@ -89,7 +89,7 @@ interface Project {
   id: string;
   name: string;
   description?: string;
-  color: string;            // Hex or badge color class
+  color: string;            // Lowercase hex #rrggbb (preset swatch or custom picker)
   icon: string;             // Lucide icon name or key
   createdAt: string;        // ISO string
 }
@@ -116,3 +116,4 @@ interface FocusSession {
 3. **Responsive SPA Layout**: Sidebar navigation for desktop and bottom/drawer navigation for mobile views.
 4. **Single Greeting Source**: The Overview greeting always uses the persisted profile name; never hardcode a display name in components.
 5. **Keyboard-Accessible Filters**: Every filter/sort control in the Tasks view must be operable without a mouse (open, navigate, select, escape) and expose correct ARIA listbox semantics via the shared `Dropdown`.
+6. **Project Theme Color**: Projects support theme color selection via 7 preset swatches or a custom native color picker (`input[type="color"]`, `aria-label="Custom theme color"`). Values are always saved as lowercase hex strings (`#rrggbb`), and editing a project preserves its existing color until changed.

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { Project } from '../../types';
-import { X, Palette } from 'lucide-react';
+import { X, Palette, Pipette } from 'lucide-react';
 
 interface ProjectFormProps {
   isOpen: boolean;
@@ -56,7 +56,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
       {
         name: name.trim(),
         description: description.trim() || undefined,
-        color,
+        color: color.toLowerCase(),
         icon: 'Folder',
       },
       editingProject?.id
@@ -64,6 +64,8 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
 
     onClose();
   };
+
+  const isPreset = PASTEL_COLORS.some((c) => c.toLowerCase() === color.toLowerCase());
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#2A2538]/30 backdrop-blur-xs p-4">
@@ -130,12 +132,27 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                   key={c}
                   onClick={() => setColor(c)}
                   className={`w-8 h-8 rounded-full transition-all flex items-center justify-center ${
-                    color === c ? 'ring-2 ring-offset-2 ring-[#7657D9] scale-110' : 'hover:scale-105'
+                    color.toLowerCase() === c.toLowerCase() ? 'ring-2 ring-offset-2 ring-[#7657D9] scale-110' : 'hover:scale-105'
                   }`}
                   style={{ backgroundColor: c }}
                   aria-label={`Select color ${c}`}
                 />
               ))}
+              <label
+                className={`relative w-8 h-8 rounded-full transition-all flex items-center justify-center cursor-pointer border border-[#F0EDE8] ${
+                  !isPreset ? 'ring-2 ring-offset-2 ring-[#7657D9] scale-110' : 'hover:scale-105'
+                } focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-[#7657D9]`}
+                style={{ backgroundColor: isPreset ? '#7657D9' : color }}
+              >
+                <Pipette className="w-4 h-4 text-white drop-shadow-xs pointer-events-none z-10" />
+                <input
+                  type="color"
+                  value={color.toLowerCase()}
+                  onChange={(e) => setColor(e.target.value.toLowerCase())}
+                  aria-label="Custom theme color"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer rounded-full"
+                />
+              </label>
             </div>
           </div>
 

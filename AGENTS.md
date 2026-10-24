@@ -68,6 +68,17 @@ src/
 - Every `ViewMode` must have a matching entry in **both** `Sidebar.tsx` and `MobileNavigation.tsx` nav lists; adding a view requires updating both plus the `App.tsx` view switch.
 - Profile name (default `'Alex'`) is displayed in the Overview greeting (`OverviewDashboard.tsx`) via the `profileName` prop and edited in `SettingsView.tsx`. Name is trimmed and limited to 1–40 characters.
 
+### F. Data Backup & Portability (`storageService.exportData` and `storageService.importData`)
+- **Export Payload**: `{ version: 1, exportedAt: ISO string, data: { tasks, projects, sessions, timer } }`. File output: `focusflow-backup-YYYY-MM-DD.json`.
+- **Import Validation**: Strict schema checking for version (`version === 1`) and data domain array/object types. Write operations to `localStorage` are all-or-nothing (zero writes on validation error).
+- **UI Triggers**: Export/Import action buttons live in `src/components/settings/SettingsView.tsx` ("Data Backup & Restore" card), reached via the Settings view. Keep them out of the `Sidebar.tsx` footer.
+- **Import Flow**: `App.tsx` reads the file, asks for confirmation via `ConfirmDialog`, then calls `storageService.importData(raw)` and reloads all domain state from storage (including profile) on success.
+
+### G. Project Theme Color (`ProjectForm.tsx`)
+- 7 preset swatches (see `PASTEL_COLORS`, in order: `#7657D9`, `#F3B292`, `#7CD4B0`, `#F4D06F`, `#F3A6C8`, `#6B4AB4`, `#4A90E2`) plus 1 custom native `<input type="color">` swatch (`Pipette` icon, `aria-label="Custom theme color"`).
+- All colors are normalized with `color.toLowerCase()` on selection and submit; stored values are lowercase `#rrggbb` hex strings.
+- Active swatch: `ring-2 ring-offset-2 ring-[#7657D9] scale-110`. The custom swatch shows the current color when custom and the primary purple (`#7657D9`) when a preset is selected.
+
 ---
 
 ## 4. Coding & Refactoring Conventions
@@ -91,9 +102,3 @@ src/
    - Always verify changes with `npm run build` before finalizing tasks.
    - When a change alters domain behavior or a shared UI contract (`Dropdown`, `Select`, storage schema), update `AGENTS.md`, `PRODUCT.md`, and `DESIGN.md` in the same change so the docs never drift from the code.
    - `agent.yaml` is outside this repository's documentation scope: do not read, update, or include it in consistency checks.
-
-- Data Backup & Portability (`storageService.exportData` and `storageService.importData`):
-  - **Export Payload**: `{ version: 1, exportedAt: ISO string, data: { tasks, projects, sessions, timer } }`. File output: `focusflow-backup-YYYY-MM-DD.json`.
-  - **Import Validation**: Strict schema checking for version (`version === 1`) and data domain array/object types. Write operations to `localStorage` are all-or-nothing (zero writes on validation error).
-  - **UI Triggers**: Export/Import action buttons live in `src/components/settings/SettingsView.tsx` ("Data Backup & Restore" card), reached via the Settings view. Keep them out of the `Sidebar.tsx` footer.
-  - **Import Flow**: `App.tsx` reads the file, asks for confirmation via `ConfirmDialog`, then calls `storageService.importData(raw)` and reloads all domain state from storage (including profile) on success.

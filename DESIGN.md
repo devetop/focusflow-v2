@@ -89,6 +89,11 @@ h1, h2, h3, h4, h5, h6 {
 - Each card: white surface, `rounded-3xl`, header row with a `w-10 h-10 rounded-2xl bg-[#EFEBFC]` icon tile followed by title + muted subtitle, separated by a `border-b border-[#F0EDE8]`.
 - Actions are right-aligned pill buttons; destructive/irreversible actions (import) require `ConfirmDialog` confirmation.
 
+### G. Project Color Swatches
+- Preset row: `flex items-center gap-3`, 7 swatches at `w-8 h-8 rounded-full transition-all`.
+- Active swatch (preset or custom): `ring-2 ring-offset-2 ring-[#7657D9] scale-110`; inactive hover: `hover:scale-105`.
+- Custom swatch: same size, `border border-[#F0EDE8]`, `Pipette` icon (`w-4 h-4 text-white drop-shadow-xs`) over an invisible native `<input type="color">` (`absolute inset-0 opacity-0`, `aria-label="Custom theme color"`, `focus-within:ring-2`). Background shows the picked color when custom, `#7657D9` when a preset is active.
+
 ---
 
 ## 5. Responsive Design Rules
