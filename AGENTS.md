@@ -56,7 +56,13 @@ src/
 - Profile data (`UserProfile`) persists separately under `focusflow_profile_v1` and is **not** part of the export payload.
 - Do not change local storage schema or key names without explicit user request.
 
-### D. Navigation & Settings (`ViewMode`)
+### D. Project Selection & Task Filtering
+- **Project Selection**: Clicking anywhere on a project card (`ProjectCard.tsx`) or its "View All Tasks" button (both in Overview and Projects views) sets `taskProjectFilter` state in `App.tsx` to that project's ID and switches view to `'tasks'`.
+- **Pre-Filtered Task View**: `TaskList.tsx` accepts an optional `initialProjectId?: string` prop to seed `selectedProjectId`.
+- **Filter Reset on Direct Nav**: Navigating to My Tasks directly via Sidebar, MobileNavigation, or the Overview section header resets `taskProjectFilter` back to `'all'` so project filters do not persist unexpectedly.
+- **Card Action Propagation**: Action menus and buttons on `ProjectCard` must call `e.stopPropagation()` so opening menus or editing/deleting projects never triggers navigation.
+
+### E. Navigation & Settings (`ViewMode`)
 - `ViewMode` = `overview | tasks | projects | timer | completed | settings`.
 - Every `ViewMode` must have a matching entry in **both** `Sidebar.tsx` and `MobileNavigation.tsx` nav lists; adding a view requires updating both plus the `App.tsx` view switch.
 - Profile name (default `'Alex'`) is displayed in the Overview greeting (`OverviewDashboard.tsx`) via the `profileName` prop and edited in `SettingsView.tsx`. Name is trimmed and limited to 1–40 characters.

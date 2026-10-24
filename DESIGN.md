@@ -62,6 +62,7 @@ h1, h2, h3, h4, h5, h6 {
 ### B. Cards & Containers
 - Standard cards use `bg-white`, `border border-[#F0EDE8]`, `rounded-2xl` or `rounded-3xl`, and micro shadows (`shadow-2xs`).
 - Interactive items feature hover state border transitions (`hover:border-[#7657D9]/30` or similar).
+- **Project Cards**: `ProjectCard.tsx` container is whole-card clickable (`cursor-pointer`) to navigate to My Tasks pre-filtered to that project. Action menus and sub-buttons MUST invoke `e.stopPropagation()` so opening menus or editing/deleting projects never triggers card-level navigation.
 
 ### C. Buttons & Inputs
 - **Primary Button**: `bg-[#7657D9] hover:bg-[#6645C8] text-white rounded-full text-xs font-bold px-4 py-2.5 transition-all shadow-md shadow-[#7657D9]/20 active:scale-95`
