@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { UserProfile } from '../../types';
 import { PageHeader } from '../layout/PageHeader';
-import { User, Database, Download, Upload, Check, X } from 'lucide-react';
+import { User, Database, Download, Upload } from 'lucide-react';
 
 interface SettingsViewProps {
   profile: UserProfile;
@@ -33,11 +33,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     }
     setError(null);
     onSaveProfile({ name: trimmed });
-  };
-
-  const handleCancel = () => {
-    setNameInput(profile.name);
-    setError(null);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,19 +92,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
               <div className="flex items-center justify-end gap-2.5 pt-4">
                 <button
-                  type="button"
-                  onClick={handleCancel}
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold text-[#6D677D] hover:bg-[#F5F2EE] transition-colors"
-                >
-                  <X className="w-3.5 h-3.5" />
-                  <span>Cancel</span>
-                </button>
-                <button
                   type="submit"
                   className="flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-[#7657D9] hover:bg-[#6645C8] text-white text-xs font-bold shadow-md shadow-[#7657D9]/20 transition-all active:scale-95"
                 >
-                  <Check className="w-3.5 h-3.5 stroke-[3]" />
-                  <span>Save Changes</span>
+                  Save Changes
                 </button>
               </div>
             </form>
