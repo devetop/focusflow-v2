@@ -99,7 +99,7 @@ function FilterDropdown<T extends string>({
   };
 
   return (
-    <div ref={containerRef} className="relative inline-block w-full sm:w-auto">
+    <div ref={containerRef} className="relative inline-block flex-1 sm:flex-none min-w-0">
       <button
         ref={buttonRef}
         type="button"
@@ -109,9 +109,9 @@ function FilterDropdown<T extends string>({
         aria-expanded={isOpen}
         aria-controls={listboxId}
         aria-label={ariaLabel}
-        className="w-full sm:w-auto min-w-[130px] h-9 px-3 rounded-xl bg-[#FCFAF8] border border-[#F0EDE8] hover:border-[#7657D9]/40 focus:border-[#7657D9] focus-visible:ring-2 focus-visible:ring-[#7657D9]/20 focus:outline-none transition-all cursor-pointer flex items-center justify-between gap-2 text-xs font-semibold text-[#2A2538]"
+        className="w-full sm:w-auto h-9 px-3 rounded-xl bg-[#FCFAF8] border border-[#F0EDE8] hover:border-[#7657D9]/40 focus:border-[#7657D9] focus-visible:ring-2 focus-visible:ring-[#7657D9]/20 focus:outline-none transition-all cursor-pointer flex items-center justify-between gap-1.5 text-xs font-semibold text-[#2A2538]"
       >
-        <span className="flex items-center gap-2 truncate">
+        <span className="flex items-center gap-1.5 truncate min-w-0">
           {icon && <span className="text-[#9E98AB] flex-shrink-0">{icon}</span>}
           <span className="truncate">{selectedOption ? selectedOption.label : ''}</span>
         </span>
@@ -127,7 +127,7 @@ function FilterDropdown<T extends string>({
           id={listboxId}
           role="listbox"
           aria-label={ariaLabel}
-          className="absolute right-0 top-full mt-1 min-w-full w-max max-w-[240px] bg-white border border-[#F0EDE8] rounded-2xl shadow-lg z-20 py-1 max-h-60 overflow-y-auto"
+          className="absolute left-0 sm:left-auto sm:right-0 top-full mt-1 min-w-full w-max max-w-[calc(100vw-32px)] bg-white border border-[#F0EDE8] rounded-2xl shadow-lg z-30 py-1 max-h-60 overflow-y-auto"
         >
           {options.map((option, idx) => {
             const isSelected = option.value === value;
@@ -237,8 +237,8 @@ export const TaskList: React.FC<TaskListProps> = ({
   ];
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-[#F0EDE8] shadow-2xs">
+    <div className="flex flex-col gap-5 max-w-full">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-[#F0EDE8] shadow-2xs max-w-full">
         <div className="relative w-full sm:w-72">
           <Search className="w-4 h-4 text-[#9E98AB] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -250,7 +250,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
           <FilterDropdown
             icon={<Filter className="w-3.5 h-3.5" />}
             value={selectedProjectId}
