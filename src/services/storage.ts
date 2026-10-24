@@ -341,7 +341,11 @@ export const storageService = {
     };
     if (!data) return defaultState;
     try {
-      return JSON.parse(data);
+      const parsed = JSON.parse(data);
+      if (isValidTimerState(parsed)) {
+        return parsed;
+      }
+      return defaultState;
     } catch {
       return defaultState;
     }

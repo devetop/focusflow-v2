@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import type { Task, Project, TimerMode, TimerState, FocusSession } from '../../types';
+import React, { useState } from "react";
+import type { Task, Project, TimerMode, TimerState, FocusSession } from "../../types";
 import {
   Play,
   Pause,
@@ -19,9 +19,9 @@ import {
   History,
   CheckCircle2,
   Volume2,
-} from 'lucide-react';
-import { Dropdown, type DropdownOption } from '../ui/Dropdown';
-import { getTodayDateString } from '../../utils/date';
+} from "lucide-react";
+import { Dropdown, type DropdownOption } from "../ui/Dropdown";
+import { getTodayDateString } from "../../utils/date";
 
 interface PomodoroTimerProps {
   tasks: Task[];
@@ -30,7 +30,7 @@ interface PomodoroTimerProps {
   activeTask?: Task;
   onSelectTask: (task?: Task) => void;
   onToggleCompleteTask: (id: string) => void;
-  onSessionComplete: (session: Omit<FocusSession, 'id' | 'completedAt'>) => void;
+  onSessionComplete: (session: Omit<FocusSession, "id" | "completedAt">) => void;
   savedTimerState?: TimerState;
   onSaveTimerState?: (state: TimerState) => void;
 }
@@ -42,23 +42,22 @@ const MODE_DURATIONS: Record<TimerMode, number> = {
 };
 
 const MODE_LABELS: Record<TimerMode, string> = {
-  focus: 'Focus',
-  shortBreak: 'Short Break',
-  longBreak: 'Long Break',
+  focus: "Focus",
+  shortBreak: "Short Break",
+  longBreak: "Long Break",
 };
 
 const MODE_TABS: { id: TimerMode; label: string }[] = [
-  { id: 'focus', label: 'Focus (25m)' },
-  { id: 'shortBreak', label: 'Short Break (5m)' },
-  { id: 'longBreak', label: 'Long Break (15m)' },
+  { id: "focus", label: "Focus (25m)" },
+  { id: "shortBreak", label: "Short Break (5m)" },
+  { id: "longBreak", label: "Long Break (15m)" },
 ];
 
-// ponytail: ambience is selection-only — real playback needs audio assets, add when sound files ship.
 const AMBIENCE = [
-  { id: 'mute', label: 'Mute', icon: VolumeX },
-  { id: 'rain', label: 'Rain', icon: CloudRain },
-  { id: 'cafe', label: 'Cafe', icon: Coffee },
-  { id: 'noise', label: 'White Noise', icon: Wind },
+  { id: "mute", label: "Mute", icon: VolumeX },
+  { id: "rain", label: "Rain", icon: CloudRain },
+  { id: "cafe", label: "Cafe", icon: Coffee },
+  { id: "noise", label: "White Noise", icon: Wind },
 ] as const;
 
 const RING_RADIUS = 112;
@@ -71,121 +70,70 @@ export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
   activeTask,
   onSelectTask,
   onToggleCompleteTask,
-  onSessionComplete,
   savedTimerState,
   onSaveTimerState,
 }) => {
-  const [mode, setMode] = useState<TimerMode>(savedTimerState?.mode || 'focus');
-  const [timeLeft, setTimeLeft] = useState<number>(savedTimerState?.timeLeft || MODE_DURATIONS.focus);
-  const [isRunning, setIsRunning] = useState<boolean>(false);
-  const [sessionCount, setSessionCount] = useState<number>(savedTimerState?.totalSessionsCompletedToday || 0);
-  const [ambience, setAmbience] = useState<(typeof AMBIENCE)[number]['id']>('mute');
-  const [chime, setChime] = useState(true);
-  const [autoStartRest, setAutoStartRest] = useState(false);
+  const mode = savedTimerState?.mode || "focus";
+  const timeLeft = savedTimerState?.timeLeft ?? MODE_DURATIONS.focus;
+  const isRunning = savedTimerState?.isRunning ?? false;
+  const sessionCount = savedTimerState?.totalSessionsCompletedToday ?? 0;
+  const chime = savedTimerState?.chime ?? true;
+  const autoStartRest = savedTimerState?.autoStartRest ?? false;
 
-  const lastTickRef = useRef<number | null>(null);
+  const [ambience, setAmbience] = useState<(typeof AMBIENCE)[number]["id"]>("mute");
 
-  // Audio tone notification using Web Audio API
-  const playCompletionSound = useCallback(() => {
-    try {
-      const audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
-      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.5); // A5
-      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.8);
-    } catch {
-      // Audio context might be restricted before user gesture
-    }
-  }, []);
-
-  const switchMode = useCallback((newMode: TimerMode) => {
-    setMode(newMode);
-    setTimeLeft(MODE_DURATIONS[newMode]);
-    setIsRunning(false);
-  }, []);
-
-  const handleTimerComplete = useCallback(() => {
-    setIsRunning(false);
-    if (chime) playCompletionSound();
-
-    if (mode === 'focus') {
-      const newSessionCount = sessionCount + 1;
-      setSessionCount(newSessionCount);
-
-      onSessionComplete({
-        taskId: activeTask?.id,
-        taskTitle: activeTask?.title || 'General Focus Session',
-        durationMinutes: 25,
-        mode: 'focus',
-      });
-
-      const nextMode: TimerMode = newSessionCount % 4 === 0 ? 'longBreak' : 'shortBreak';
-      setMode(nextMode);
-      setTimeLeft(MODE_DURATIONS[nextMode]);
-      if (autoStartRest) setIsRunning(true);
-    } else {
-      switchMode('focus');
-    }
-  }, [mode, sessionCount, activeTask, onSessionComplete, playCompletionSound, switchMode, chime, autoStartRest]);
-
-  // Timestamp-based delta timer for accuracy in inactive tabs
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval> | null = null;
-
-    if (isRunning) {
-      lastTickRef.current = Date.now();
-      interval = setInterval(() => {
-        const now = Date.now();
-        const deltaSeconds = Math.round((now - (lastTickRef.current || now)) / 1000);
-        lastTickRef.current = now;
-
-        setTimeLeft((prev) => {
-          const next = prev - (deltaSeconds > 0 ? deltaSeconds : 1);
-          if (next <= 0) {
-            handleTimerComplete();
-            return 0;
-          }
-          return next;
-        });
-      }, 1000);
-    } else {
-      lastTickRef.current = null;
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
+  const updateState = (updates: Partial<TimerState>) => {
+    if (!onSaveTimerState) return;
+    const current: TimerState = savedTimerState || {
+      mode: "focus",
+      timeLeft: MODE_DURATIONS.focus,
+      isRunning: false,
+      totalSessionsCompletedToday: 0,
     };
-  }, [isRunning, mode, handleTimerComplete]);
-
-  // Save state
-  useEffect(() => {
-    if (onSaveTimerState) {
-      onSaveTimerState({
-        mode,
-        timeLeft,
-        isRunning,
-        totalSessionsCompletedToday: sessionCount,
-        activeTaskId: activeTask?.id,
-        lastTickTimestamp: isRunning ? Date.now() : undefined,
-      });
-    }
-  }, [mode, timeLeft, isRunning, sessionCount, activeTask, onSaveTimerState]);
-
-  const toggleTimer = () => setIsRunning(!isRunning);
-
-  const resetTimer = () => {
-    setIsRunning(false);
-    setTimeLeft(MODE_DURATIONS[mode]);
+    onSaveTimerState({
+      ...current,
+      ...updates,
+      activeTaskId: activeTask?.id,
+    });
   };
 
-  const skipTimer = () => switchMode(mode === 'focus' ? 'shortBreak' : 'focus');
+  const switchMode = (newMode: TimerMode) => {
+    updateState({
+      mode: newMode,
+      timeLeft: MODE_DURATIONS[newMode],
+      isRunning: false,
+      lastTickTimestamp: undefined,
+    });
+  };
+
+  const toggleTimer = () => {
+    const nextRunning = !isRunning;
+    updateState({
+      isRunning: nextRunning,
+      lastTickTimestamp: nextRunning ? Date.now() : undefined,
+    });
+  };
+
+  const resetTimer = () => {
+    updateState({
+      timeLeft: MODE_DURATIONS[mode],
+      isRunning: false,
+      lastTickTimestamp: undefined,
+    });
+  };
+
+  const skipTimer = () => {
+    const nextMode = mode === "focus" ? "shortBreak" : "focus";
+    switchMode(nextMode);
+  };
+
+  const handleToggleChime = (val: boolean) => {
+    updateState({ chime: val });
+  };
+
+  const handleToggleAutoStartRest = (val: boolean) => {
+    updateState({ autoStartRest: val });
+  };
 
   const markTaskDone = () => {
     if (!activeTask) return;
@@ -196,25 +144,25 @@ export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
   const formatClock = (iso: string) =>
-    new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+    new Date(iso).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
 
   const totalDuration = MODE_DURATIONS[mode];
   const cycleIndex = (sessionCount % 4) + 1;
   const untilLongBreak = 4 - (sessionCount % 4);
   const availableTasks = tasks.filter((t) => !t.completed);
   const taskLinkOptions: DropdownOption<string>[] = [
-    { value: '', label: 'No task' },
+    { value: "", label: "No task" },
     ...availableTasks.map((t) => ({ value: t.id, label: t.title })),
   ];
   const project = projects.find((p) => p.id === activeTask?.projectId);
 
   const todayStr = getTodayDateString();
   const todaySessions = sessions.filter((s) => s.completedAt && s.completedAt.startsWith(todayStr));
-  const focusSessions = todaySessions.filter((s) => s.mode === 'focus');
+  const focusSessions = todaySessions.filter((s) => s.mode === "focus");
   const focusMinutes = focusSessions.reduce((acc, s) => acc + s.durationMinutes, 0);
   const tasksInFlow = new Set(focusSessions.map((s) => s.taskId).filter(Boolean)).size;
 
@@ -223,20 +171,14 @@ export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
     : 0;
   const estimatedPomos = activeTask ? Math.max(1, Math.round(activeTask.estimatedMinutes / 25)) : 0;
 
-  // Consecutive days with at least one logged session, counting back from today.
-  const dayKeys = new Set(sessions.map((s) => s.completedAt.slice(0, 10)));
-  let streak = 0;
-  const cursor = new Date();
-  while (dayKeys.has(cursor.toISOString().slice(0, 10))) {
-    streak += 1;
-    cursor.setDate(cursor.getDate() - 1);
-  }
-
   const metrics = [
-    { label: 'Time', value: `${focusMinutes}m`, caption: 'Focus today', icon: Clock, tone: 'text-[#7657D9]' },
-    { label: 'Pomos', value: String(focusSessions.length), caption: 'Completed', icon: Brain, tone: 'text-[#976247]' },
-    { label: 'Tasks', value: String(tasksInFlow), caption: 'In flow', icon: ListTodo, tone: 'text-[#6B4AB4]' },
+    { label: "Time", value: `${focusMinutes}m`, caption: "Focus today", icon: Clock, tone: "text-[#7657D9]" },
+    { label: "Pomos", value: String(focusSessions.length), caption: "Completed", icon: Brain, tone: "text-[#976247]" },
+    { label: "Tasks", value: String(tasksInFlow), caption: "In flow", icon: ListTodo, tone: "text-[#6B4AB4]" },
   ];
+
+  const progress = totalDuration > 0 ? (totalDuration - timeLeft) / totalDuration : 0;
+  const strokeDashoffset = RING_CIRCUMFERENCE * (1 - progress);
 
   return (
     <div className="flex flex-col">
@@ -248,150 +190,105 @@ export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
             <span className="text-[#D9D3CC]">/</span>
             <span className="text-[#7657D9]">Focus Timer</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#2A2538] tracking-tight">
-            Deep Focus Room
-          </h1>
-          <p className="text-sm text-[#6D677D] mt-1 font-medium">
-            Select a task, eliminate distractions, and immerse in single-tasking flow.
-          </p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#2A2538] tracking-tight">Focus Flow</h1>
         </div>
 
-        <div className="flex items-center gap-2 bg-white border border-[#F0EDE8] px-4 py-2.5 rounded-full shadow-xs self-start md:self-auto">
-          <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
-            <span
-              className={`absolute inline-flex h-full w-full rounded-full bg-[#9B7AE8] ${
-                isRunning ? 'animate-ping opacity-75' : 'opacity-0'
-              }`}
-            />
-            <span
-              className={`relative inline-flex h-2.5 w-2.5 rounded-full ${
-                isRunning ? 'bg-[#7657D9]' : 'bg-[#D9D3CC]'
-              }`}
-            />
+        <div className="flex items-center gap-2 text-xs font-bold text-[#6D677D]">
+          <span className="px-3 py-1.5 rounded-full bg-white border border-[#F0EDE8] shadow-xs flex items-center gap-1.5">
+            <Flame className="w-4 h-4 text-[#7657D9]" />
+            Session #{cycleIndex} of 4
           </span>
-          <span className="text-xs font-bold text-[#2A2538]">
-            {isRunning ? 'Flow Mode Active' : 'Flow Paused'}
-          </span>
-          <span className="text-[#D9D3CC] text-xs">|</span>
-          <span className="flex items-center gap-1.5 text-[#7657D9] text-xs font-bold">
-            <Flame className="w-3.5 h-3.5 fill-current" />
-            {streak} Streak
+          <span className="px-3 py-1.5 rounded-full bg-white border border-[#F0EDE8] shadow-xs">
+            {untilLongBreak === 4 ? "Long break after this" : `${untilLongBreak} pomos to long break`}
           </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-        {/* LEFT: Focus console + active task */}
-        <div className="lg:col-span-7 flex flex-col gap-5">
-          <div className="relative bg-white rounded-3xl border border-[#F0EDE8] shadow-xs p-6 sm:p-8 overflow-hidden flex flex-col items-center text-center">
-            <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-[#EFEBFC]/70 rounded-full blur-3xl pointer-events-none" />
-
-            {/* Mode tabs */}
-            <div className="relative z-10 inline-flex flex-wrap justify-center p-1.5 bg-[#F5F2EE] rounded-full gap-1 mb-6">
-              {MODE_TABS.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => switchMode(tab.id)}
-                  aria-pressed={mode === tab.id}
-                  className={`px-4 sm:px-5 py-2 rounded-full text-xs font-bold transition-all ${
-                    mode === tab.id
-                      ? 'bg-[#7657D9] text-white shadow-xs'
-                      : 'text-[#6D677D] hover:bg-white hover:text-[#2A2538]'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-7">
+        {/* LEFT: Timer circle & controls */}
+        <div className="lg:col-span-7 flex flex-col gap-6">
+          <div className="bg-white rounded-3xl border border-[#F0EDE8] shadow-xs p-6 sm:p-8 flex flex-col items-center">
+            {/* Mode selector tabs */}
+            <div className="flex items-center p-1.5 bg-[#F5F2EE] rounded-2xl mb-8 w-full max-w-md justify-between gap-1">
+              {MODE_TABS.map((tab) => {
+                const active = mode === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => switchMode(tab.id)}
+                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all text-center ${
+                      active ? "bg-white text-[#2A2538] shadow-xs" : "text-[#6D677D] hover:text-[#2A2538]"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Dial */}
+            {/* Circle graphic */}
             <div className="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center my-2">
-              <svg className="w-full h-full -rotate-90" viewBox="0 0 260 260" aria-hidden="true">
-                <circle cx="130" cy="130" r={RING_RADIUS} fill="transparent" stroke="#EFEBFC" strokeWidth="10" />
+              <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 256 256">
                 <circle
-                  cx="130"
-                  cy="130"
+                  cx="128"
+                  cy="128"
                   r={RING_RADIUS}
+                  className="stroke-[#F5F2EE]"
+                  strokeWidth="12"
                   fill="transparent"
-                  stroke="#7657D9"
-                  strokeWidth="10"
-                  strokeLinecap="round"
+                />
+                <circle
+                  cx="128"
+                  cy="128"
+                  r={RING_RADIUS}
+                  className="stroke-[#7657D9] transition-all duration-500 ease-linear"
+                  strokeWidth="12"
                   strokeDasharray={RING_CIRCUMFERENCE}
-                  strokeDashoffset={RING_CIRCUMFERENCE * (1 - timeLeft / totalDuration)}
-                  className="transition-all duration-700 ease-out"
+                  strokeDashoffset={strokeDashoffset}
+                  strokeLinecap="round"
+                  fill="transparent"
                 />
               </svg>
 
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
-                <div className="flex items-center gap-1.5 px-3 py-1 bg-[#F5F2EE] rounded-full mb-2">
-                  <Flame className="w-3 h-3 text-[#976247] fill-current" />
-                  <span className="text-[11px] font-bold text-[#6D677D]">Session {cycleIndex} of 4</span>
-                </div>
-                <span
-                  className="text-5xl sm:text-[56px] font-extrabold text-[#2A2538] tracking-tighter tabular-nums"
-                  aria-live="polite"
-                  aria-label={`${formatTime(timeLeft)} remaining`}
-                >
+              <div className="absolute flex flex-col items-center justify-center text-center">
+                <span className="text-4xl sm:text-5xl font-black text-[#2A2538] tracking-tight font-mono">
                   {formatTime(timeLeft)}
                 </span>
-                <span className="text-xs text-[#9E98AB] mt-1 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#D1BCFF] animate-pulse" />
-                  Single-task cadence
+                <span className="mt-2 px-3 py-1 rounded-full bg-[#E9DDFF] text-[#441F8D] text-xs font-extrabold uppercase tracking-wider">
+                  {MODE_LABELS[mode]}
                 </span>
               </div>
             </div>
 
             {/* Controls */}
-            <div className="relative z-10 flex items-center justify-center gap-3 mt-6 w-full max-w-sm">
+            <div className="flex items-center gap-4 mt-8">
               <button
                 onClick={resetTimer}
-                className="flex-1 py-3 px-4 rounded-full bg-[#F5F2EE] hover:bg-[#EAE5E0] text-[#6D677D] hover:text-[#2A2538] text-xs font-bold transition-all active:scale-95 flex items-center justify-center gap-1.5"
+                className="w-11 h-11 rounded-full bg-[#F5F2EE] hover:bg-[#EAE5E0] text-[#6D677D] hover:text-[#2A2538] flex items-center justify-center transition-colors"
+                aria-label="Reset timer"
               >
-                <RotateCcw className="w-4 h-4" />
-                <span>Reset</span>
+                <RotateCcw className="w-5 h-5" />
               </button>
+
               <button
                 onClick={toggleTimer}
-                className="flex-[1.6] py-3.5 px-6 rounded-full bg-[#7657D9] hover:bg-[#6645C8] text-white text-sm font-bold shadow-md shadow-[#7657D9]/25 transition-all active:scale-95 flex items-center justify-center gap-2"
+                className="w-16 h-16 rounded-2xl bg-[#5D3CBF] hover:bg-[#7657D9] text-white flex items-center justify-center transition-all shadow-md hover:scale-105 active:scale-95"
+                aria-label={isRunning ? "Pause timer" : "Start timer"}
               >
-                {isRunning ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
-                <span>{isRunning ? 'Pause' : 'Start'}</span>
+                {isRunning ? <Pause className="w-7 h-7 fill-current" /> : <Play className="w-7 h-7 fill-current ml-0.5" />}
               </button>
+
               <button
                 onClick={skipTimer}
-                className="flex-1 py-3 px-4 rounded-full bg-[#F5F2EE] hover:bg-[#EAE5E0] text-[#6D677D] hover:text-[#2A2538] text-xs font-bold transition-all active:scale-95 flex items-center justify-center gap-1.5"
+                className="w-11 h-11 rounded-full bg-[#F5F2EE] hover:bg-[#EAE5E0] text-[#6D677D] hover:text-[#2A2538] flex items-center justify-center transition-colors"
+                aria-label="Skip to next session"
               >
-                <SkipForward className="w-4 h-4" />
-                <span>Skip</span>
+                <SkipForward className="w-5 h-5" />
               </button>
-            </div>
-
-            {/* Session segment meter */}
-            <div className="mt-6 pt-4 border-t border-[#F0EDE8] w-full flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold text-[#9E98AB]">Target Cycle:</span>
-                <div className="flex items-center gap-1.5">
-                  {[0, 1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className={`h-2 w-8 rounded-full ${
-                        i < cycleIndex - 1
-                          ? 'bg-[#7657D9]'
-                          : i === cycleIndex - 1
-                          ? 'bg-[#D1BCFF] animate-pulse'
-                          : 'bg-[#F0EDE8]'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
-              <span className="text-[11px] font-bold text-[#7657D9]">
-                {untilLongBreak} session{untilLongBreak === 1 ? '' : 's'} until long break
-              </span>
             </div>
           </div>
 
-          {/* Active task card */}
+          {/* Active task link card */}
           <div className="bg-white rounded-3xl border border-[#F0EDE8] shadow-xs p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start gap-3 min-w-0">
               <button
@@ -414,13 +311,13 @@ export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
                   )}
                 </div>
                 <p className="text-base font-bold text-[#2A2538] truncate">
-                  {activeTask ? activeTask.title : 'General Focus Session'}
+                  {activeTask ? activeTask.title : "General Focus Session"}
                 </p>
                 <span className="text-xs text-[#6D677D] flex items-center gap-1 mt-0.5">
                   <Clock className="w-3.5 h-3.5" />
                   {activeTask
-                    ? `Estimated: ${estimatedPomos} pomodoro${estimatedPomos === 1 ? '' : 's'} (${activeTaskSessions} completed)`
-                    : 'No task linked to this session'}
+                    ? `Estimated: ${estimatedPomos} pomodoro${estimatedPomos === 1 ? "" : "s"} (${activeTaskSessions} completed)`
+                    : "No task linked to this session"}
                 </span>
               </div>
             </div>
@@ -428,7 +325,7 @@ export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
             <div className="flex items-center gap-2 w-full md:w-auto justify-end flex-shrink-0">
               <div className="w-full md:w-52">
                 <Dropdown
-                  value={activeTask?.id || ''}
+                  value={activeTask?.id || ""}
                   onChange={(id) => onSelectTask(tasks.find((t) => t.id === id))}
                   options={taskLinkOptions}
                   ariaLabel="Link Focus Session To Task"
@@ -487,8 +384,8 @@ export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
                     aria-pressed={active}
                     className={`flex flex-col items-center justify-center p-2.5 rounded-xl text-[11px] font-bold transition-colors ${
                       active
-                        ? 'bg-[#E9DDFF] text-[#441F8D]'
-                        : 'bg-[#F5F2EE] text-[#6D677D] hover:text-[#2A2538] hover:bg-[#EAE5E0]'
+                        ? "bg-[#E9DDFF] text-[#441F8D]"
+                        : "bg-[#F5F2EE] text-[#6D677D] hover:text-[#2A2538] hover:bg-[#EAE5E0]"
                     }`}
                   >
                     <Icon className="w-5 h-5 mb-1" />
@@ -509,7 +406,7 @@ export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
                     type="checkbox"
                     className="sr-only peer"
                     checked={chime}
-                    onChange={(e) => setChime(e.target.checked)}
+                    onChange={(e) => handleToggleChime(e.target.checked)}
                     aria-label="Bell chime at session end"
                   />
                   <span className="w-10 h-6 bg-[#EAE5E0] rounded-full transition-colors peer-checked:bg-[#7657D9] peer-focus-visible:ring-2 peer-focus-visible:ring-[#7657D9]/30 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-4" />
@@ -526,7 +423,7 @@ export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
                     type="checkbox"
                     className="sr-only peer"
                     checked={autoStartRest}
-                    onChange={(e) => setAutoStartRest(e.target.checked)}
+                    onChange={(e) => handleToggleAutoStartRest(e.target.checked)}
                     aria-label="Auto-start rest intervals"
                   />
                   <span className="w-10 h-6 bg-[#EAE5E0] rounded-full transition-colors peer-checked:bg-[#7657D9] peer-focus-visible:ring-2 peer-focus-visible:ring-[#7657D9]/30 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-4" />
@@ -557,20 +454,20 @@ export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
                     <div key={s.id} className="relative flex items-start gap-3 pl-1">
                       <span
                         className={`w-4 h-4 rounded-full flex-shrink-0 mt-1 ring-4 ring-white ${
-                          s.mode === 'focus' ? 'bg-[#7657D9]' : 'bg-[#D1BCFF]'
+                          s.mode === "focus" ? "bg-[#7657D9]" : "bg-[#D1BCFF]"
                         }`}
                       />
                       <div className="bg-[#FCFAF8] rounded-xl p-2.5 flex-1 flex items-center justify-between gap-2 min-w-0">
                         <div className="min-w-0">
                           <p className="text-xs font-bold text-[#2A2538] truncate">
-                            {s.taskTitle || 'General Focus Session'}
+                            {s.taskTitle || "General Focus Session"}
                           </p>
                           <span className="text-[11px] text-[#9E98AB]">
-                            {formatClock(start.toISOString())} - {formatClock(s.completedAt)} •{' '}
+                            {formatClock(start.toISOString())} - {formatClock(s.completedAt)} •{" "}
                             {s.durationMinutes}m {MODE_LABELS[s.mode]}
                           </span>
                         </div>
-                        {s.mode === 'focus' ? (
+                        {s.mode === "focus" ? (
                           <CheckCircle2 className="w-4 h-4 text-[#7657D9] flex-shrink-0" />
                         ) : (
                           <Coffee className="w-4 h-4 text-[#6B4AB4] flex-shrink-0" />

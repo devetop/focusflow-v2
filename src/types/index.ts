@@ -49,6 +49,8 @@ export interface TimerState {
   totalSessionsCompletedToday: number;
   activeTaskId?: string;
   lastTickTimestamp?: number;
+  chime?: boolean;
+  autoStartRest?: boolean;
 }
 
 export interface ToastMessage {
