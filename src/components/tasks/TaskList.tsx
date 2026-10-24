@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useId } from 'react';
 import type { Task, Project, TaskFilterTab, Priority } from '../../types';
 import { getTodayDateString } from '../../utils/date';
 import { TaskItem } from './TaskItem';
-import { Search, Filter, ArrowUpDown, CheckCircle2 } from 'lucide-react';
-import { Select } from '../ui/Select';
+import { Search, Filter, ArrowUpDown, CheckCircle2, ChevronDown, Check } from 'lucide-react';
 
 interface TaskListProps {
   tasks: Task[];
@@ -13,6 +12,151 @@ interface TaskListProps {
   onDelete: (id: string) => void;
   onStartTimer?: (task: Task) => void;
   initialTab?: TaskFilterTab;
+}
+
+interface FilterDropdownOption<T extends string> {
+  value: T;
+  label: string;
+}
+
+interface FilterDropdownProps<T extends string> {
+  value: T;
+  onChange: (value: T) => void;
+  options: FilterDropdownOption<T>[];
+  icon?: React.ReactNode;
+  ariaLabel: string;
+}
+
+function FilterDropdown<T extends string>({
+  value,
+  onChange,
+  options,
+  icon,
+  ariaLabel,
+}: FilterDropdownProps<T>) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState<number>(-1);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const listboxId = useId();
+
+  const selectedOption = options.find((opt) => opt.value === value) || options[0];
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
+  const toggleDropdown = () => {
+    setIsOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        const idx = options.findIndex((opt) => opt.value === value);
+        setFocusedIndex(idx >= 0 ? idx : 0);
+      }
+      return next;
+    });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isOpen) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleDropdown();
+      }
+      return;
+    }
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      setIsOpen(false);
+      buttonRef.current?.focus();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setFocusedIndex((prev) => (prev + 1) % options.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setFocusedIndex((prev) => (prev - 1 + options.length) % options.length);
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      if (focusedIndex >= 0 && focusedIndex < options.length) {
+        onChange(options[focusedIndex].value);
+        setIsOpen(false);
+        buttonRef.current?.focus();
+      }
+    } else if (e.key === 'Tab') {
+      setIsOpen(false);
+    }
+  };
+
+  return (
+    <div ref={containerRef} className="relative inline-block w-full sm:w-auto">
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={toggleDropdown}
+        onKeyDown={handleKeyDown}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-controls={listboxId}
+        aria-label={ariaLabel}
+        className="w-full sm:w-auto min-w-[130px] h-9 px-3 rounded-xl bg-[#FCFAF8] border border-[#F0EDE8] hover:border-[#7657D9]/40 focus:border-[#7657D9] focus-visible:ring-2 focus-visible:ring-[#7657D9]/20 focus:outline-none transition-all cursor-pointer flex items-center justify-between gap-2 text-xs font-semibold text-[#2A2538]"
+      >
+        <span className="flex items-center gap-2 truncate">
+          {icon && <span className="text-[#9E98AB] flex-shrink-0">{icon}</span>}
+          <span className="truncate">{selectedOption ? selectedOption.label : ''}</span>
+        </span>
+        <ChevronDown
+          className={`w-3.5 h-3.5 text-[#9E98AB] flex-shrink-0 transition-transform duration-200 ${
+            isOpen ? 'rotate-180' : ''
+          }`}
+        />
+      </button>
+
+      {isOpen && (
+        <ul
+          id={listboxId}
+          role="listbox"
+          aria-label={ariaLabel}
+          className="absolute right-0 top-full mt-1 min-w-full w-max max-w-[240px] bg-white border border-[#F0EDE8] rounded-2xl shadow-lg z-20 py-1 max-h-60 overflow-y-auto"
+        >
+          {options.map((option, idx) => {
+            const isSelected = option.value === value;
+            const isFocused = idx === focusedIndex;
+
+            return (
+              <li
+                key={option.value}
+                role="option"
+                aria-selected={isSelected}
+                onClick={() => {
+                  onChange(option.value);
+                  setIsOpen(false);
+                  buttonRef.current?.focus();
+                }}
+                onMouseEnter={() => setFocusedIndex(idx)}
+                className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-xs font-semibold cursor-pointer transition-colors ${
+                  isSelected ? 'text-[#7657D9] bg-[#EFEBFC]/50' : 'text-[#6D677D]'
+                } ${isFocused && !isSelected ? 'bg-[#F5F2EE] text-[#2A2538]' : ''}`}
+              >
+                <span className="truncate">{option.label}</span>
+                {isSelected && <Check className="w-3.5 h-3.5 text-[#7657D9] flex-shrink-0" />}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
 }
 
 export const TaskList: React.FC<TaskListProps> = ({
@@ -74,6 +218,24 @@ export const TaskList: React.FC<TaskListProps> = ({
 
   const getProject = (projId?: string) => projects.find((p) => p.id === projId);
 
+  const projectOptions: FilterDropdownOption<string>[] = [
+    { value: 'all', label: 'All Projects' },
+    ...projects.map((p) => ({ value: p.id, label: p.name })),
+  ];
+
+  const priorityOptions: FilterDropdownOption<string>[] = [
+    { value: 'all', label: 'All Priorities' },
+    { value: 'high', label: 'High' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'low', label: 'Low' },
+  ];
+
+  const sortOptions: FilterDropdownOption<'dueDate' | 'priority' | 'createdAt'>[] = [
+    { value: 'dueDate', label: 'Sort: Due Date' },
+    { value: 'priority', label: 'Sort: Priority' },
+    { value: 'createdAt', label: 'Sort: Created Date' },
+  ];
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-[#F0EDE8] shadow-2xs">
@@ -89,44 +251,28 @@ export const TaskList: React.FC<TaskListProps> = ({
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
-          <Select
+          <FilterDropdown
             icon={<Filter className="w-3.5 h-3.5" />}
             value={selectedProjectId}
-            onChange={(e) => setSelectedProjectId(e.target.value)}
-            aria-label="Filter by project"
-            containerClassName="w-full sm:w-auto min-w-[130px]"
-          >
-            <option value="all">All Projects</option>
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </Select>
+            onChange={setSelectedProjectId}
+            options={projectOptions}
+            ariaLabel="Filter by project"
+          />
 
-          <Select
+          <FilterDropdown
             value={selectedPriority}
-            onChange={(e) => setSelectedPriority(e.target.value)}
-            aria-label="Filter by priority"
-            containerClassName="w-full sm:w-auto min-w-[120px]"
-          >
-            <option value="all">All Priorities</option>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
-          </Select>
+            onChange={setSelectedPriority}
+            options={priorityOptions}
+            ariaLabel="Filter by priority"
+          />
 
-          <Select
+          <FilterDropdown
             icon={<ArrowUpDown className="w-3.5 h-3.5" />}
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as 'dueDate' | 'priority' | 'createdAt')}
-            aria-label="Sort tasks"
-            containerClassName="w-full sm:w-auto min-w-[140px]"
-          >
-            <option value="dueDate">Sort: Due Date</option>
-            <option value="priority">Sort: Priority</option>
-            <option value="createdAt">Sort: Created Date</option>
-          </Select>
+            onChange={setSortBy}
+            options={sortOptions}
+            ariaLabel="Sort tasks"
+          />
         </div>
       </div>
 
