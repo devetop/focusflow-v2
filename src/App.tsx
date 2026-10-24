@@ -224,6 +224,8 @@ export function App() {
     setCurrentView(view);
   };
 
+  const defaultProjectId = currentView === "tasks" && taskProjectFilter !== "all" ? taskProjectFilter : undefined;
+
   const todayStr = getTodayDateString();
   const todayTasks = tasks.filter((t) => t.dueDate === todayStr && !t.completed);
 
@@ -431,6 +433,7 @@ export function App() {
         onSubmit={handleSaveTask}
         projects={projects}
         editingTask={editingTask}
+        defaultProjectId={defaultProjectId}
       />
 
       <ProjectForm
