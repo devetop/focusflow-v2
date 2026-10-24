@@ -20,9 +20,10 @@
 ## 3. Core Feature Modules
 
 ### 1. Overview Dashboard (`OverviewDashboard.tsx`)
-- High-level productivity metrics: Total tasks, completed today, pending count, and focus minutes logged.
-- Quick summary of active projects with completion progress bars. Clicking any project card or its "View All Tasks" button navigates to My Tasks pre-filtered to that project's tasks.
-- Quick-access list for high-priority tasks.
+- Today's completion progress with a greeting from the persisted profile name, a 7-day completed-task bar chart, and today's focus task list (up to 4 tasks).
+- Focus summary card (total focus minutes and session count for today) linking to the Focus Timer.
+- Active projects preview (first 2) with completion progress bars. Clicking any project card or its "View All Tasks" button navigates to My Tasks pre-filtered to that project's tasks.
+- Every card/stat is computed from the raw task and session arrays, independent of TaskList filter state.
 
 ### 2. My Tasks (`TaskList.tsx`, `TaskItem.tsx`, `TaskForm.tsx`)
 - **Filter Tabs**:
@@ -33,8 +34,9 @@
   - **Completed**: Shows all completed tasks regardless of date.
 - **Search & Filtering**: Real-time text search (title, description, tags), project filter dropdown, priority filter dropdown, and multi-field sorting (Due Date, Priority, Creation Date). Pre-filters by project when arriving from a selected project card; navigating directly from sidebar resets project filter to "All Projects".
 - **Contextual Task Creation**: Clicking "Add Task" while in a project-filtered task view automatically pre-selects that project in the task creation form (`defaultProjectId`). Users can still manually change or clear the project dropdown. Opening "Add Task" from Overview, direct "My Tasks" (All Projects), Completed, Projects, or Timer views defaults to the fallback project or unassigned state without leaking the filter. Editing an existing task always preserves the task's assigned project.
-- **Filter Controls**: List filters render as custom accessible listbox dropdowns (ARIA + full keyboard support) so every filter stays usable and readable on desktop and mobile; task form and timer task pickers use styled native selects.
+- **Filter Controls**: Task list filters/sort use the shared accessible `Dropdown` listbox (`src/components/ui/Dropdown.tsx`, ARIA + full keyboard support); the `TaskForm` Project field uses the same `Dropdown` with `fullWidth`, and the timer task linker uses the styled native `Select`.
 - **Task Actions**: Complete/Uncomplete toggle, inline timer trigger, edit modal, and delete confirmation.
+- **Empty States**: Empty lists render a centered card with a lavender icon tile and a context-aware message (adjust filters when filtered/searching, completed tasks appear here on the Completed tab, otherwise prompt adding a task).
 
 ### 3. Focus Timer (`PomodoroTimer.tsx`)
 - **Timer Modes**:
@@ -42,7 +44,8 @@
   - **Short Break**: 5 minutes break.
   - **Long Break**: 15 minutes break.
 - **Task Integration**: Optionally attach the timer to a specific active task to log dedicated focus sessions.
-- **Session History**: Records completed focus sessions with timestamps and durations.
+- **Session Logging**: Completed focus sessions are appended to `localStorage` (`focusflow_sessions_v1`) with task link, duration, mode, and timestamp; the Overview summarises today's totals.
+- **Persisted Timer State**: Mode, remaining seconds, running flag, session count, and linked task are saved under `focusflow_timer_v1` and restored on reload.
 
 ### 4. Settings & Data Management (`SettingsView.tsx`)
 - **Profile Details**: Edit the display name used in the Overview greeting. Trimmed, 1–40 characters, defaults to `'Alex'`. Saved immediately to `localStorage` (`focusflow_profile_v1`) with a toast confirmation.
@@ -50,6 +53,7 @@
 - **Strict Data Import**: Supports restoring workspace state from valid `.json` snapshot files. Performs all-or-nothing validation against version schema (`version: 1`) and domain type structures. Rejecting invalid or corrupt schemas leaves active local data untouched.
 - **Safety Confirmation**: Displays a safety confirmation modal (`ConfirmDialog`) prior to overwriting active workspace state. Automatically refreshes application state live (including profile) without requiring manual browser page reload.
 - **Entry Point**: Reached via the `settings` view in `Sidebar.tsx` and `MobileNavigation.tsx`; backup/restore actions live here, not in the sidebar footer.
+- **Project Deletion**: Deleting a project prompts a `ConfirmDialog` and unassigns its tasks (tasks are preserved, `projectId` cleared) rather than deleting them.
 
 ---
 
@@ -111,4 +115,4 @@ interface FocusSession {
 2. **Offline Local Storage**: All state is initialized from and saved to browser `localStorage` using keys prefixed with `focusflow_`. Profile data uses `focusflow_profile_v1` and is not part of export/import payloads.
 3. **Responsive SPA Layout**: Sidebar navigation for desktop and bottom/drawer navigation for mobile views.
 4. **Single Greeting Source**: The Overview greeting always uses the persisted profile name; never hardcode a display name in components.
-5. **Keyboard-Accessible Filters**: Every filter/sort control in the Tasks view must be operable without a mouse (open, navigate, select, escape) and expose correct ARIA listbox semantics.
+5. **Keyboard-Accessible Filters**: Every filter/sort control in the Tasks view must be operable without a mouse (open, navigate, select, escape) and expose correct ARIA listbox semantics via the shared `Dropdown`.

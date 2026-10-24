@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Task, Project, Priority } from '../../types';
 import { X, Calendar, Clock, Tag, Folder } from 'lucide-react';
-import { Select } from '../ui/Select';
+import { Dropdown, type DropdownOption } from '../ui/Dropdown';
 
 interface TaskFormProps {
   isOpen: boolean;
@@ -79,6 +79,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
     onClose();
   };
+
+  const projectOptions: DropdownOption<string>[] = [
+    { value: '', label: 'No Project (Unassigned)' },
+    ...projects.map((p) => ({ value: p.id, label: p.name })),
+  ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#2A2538]/30 backdrop-blur-xs p-4 overflow-y-auto">
@@ -195,18 +200,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                 <Folder className="w-3.5 h-3.5 text-[#7657D9]" />
                 Project
               </label>
-              <Select
+              <Dropdown
+                fullWidth
                 value={projectId}
-                onChange={(e) => setProjectId(e.target.value)}
-                aria-label="Assign Project"
-              >
-                <option value="">No Project (Unassigned)</option>
-                {projects.map((proj) => (
-                  <option key={proj.id} value={proj.id}>
-                    {proj.name}
-                  </option>
-                ))}
-              </Select>
+                onChange={setProjectId}
+                options={projectOptions}
+                ariaLabel="Assign Project"
+              />
             </div>
 
             <div>

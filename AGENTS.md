@@ -31,7 +31,7 @@ src/
 │   ├── projects/         # ProjectCard and ProjectForm components
 │   ├── timer/            # PomodoroTimer component
 │   ├── settings/         # SettingsView (profile + data backup/restore)
-│   ├── ui/               # Select: styled native <select> for form fields
+│   ├── ui/               # Select: styled native <select>; Dropdown: shared accessible listbox
 │   └── layout/           # AppShell, Sidebar, PageHeader, MobileNavigation, Toast, ConfirmDialog
 ├── App.tsx               # Root component managing global state, active tab views, & modal state
 ├── index.css             # Tailwind v4 import & custom CSS variable theme definitions
@@ -60,7 +60,7 @@ src/
 - **Project Selection**: Clicking anywhere on a project card (`ProjectCard.tsx`) or its "View All Tasks" button (both in Overview and Projects views) sets `taskProjectFilter` state in `App.tsx` to that project's ID and switches view to `'tasks'`.
 - **Pre-Filtered Task View**: `TaskList.tsx` accepts an optional `initialProjectId?: string` prop to seed `selectedProjectId`.
 - **Filter Reset on Direct Nav**: Navigating to My Tasks directly via Sidebar, MobileNavigation, or the Overview section header resets `taskProjectFilter` back to `'all'` so project filters do not persist unexpectedly.
-- **Task Creation Project Context**: When opening "Add Task" from a project-filtered task view (`currentView === 'tasks'` and `taskProjectFilter !== 'all'`), `defaultProjectId` MUST be set to `taskProjectFilter` and passed to `TaskForm`. In all other views or when `taskProjectFilter === 'all'`, `defaultProjectId` MUST be `undefined`. When editing an existing task, `editingTask.projectId` always takes precedence over `defaultProjectId`.
+- **Task Creation Project Context**: When opening "Add Task" from a project-filtered task view (`currentView === 'tasks'` and `taskProjectFilter !== 'all'`), `defaultProjectId` MUST be set to `taskProjectFilter` and passed to `TaskForm`. In all other views or when `taskProjectFilter === 'all'`, `defaultProjectId` MUST be `undefined`; `TaskForm` then falls back to the first project (or unassigned when no projects exist). When editing an existing task, `editingTask.projectId` always takes precedence over `defaultProjectId`.
 - **Card Action Propagation**: Action menus and buttons on `ProjectCard` must call `e.stopPropagation()` so opening menus or editing/deleting projects never triggers navigation.
 
 ### E. Navigation & Settings (`ViewMode`)
@@ -82,14 +82,15 @@ src/
 3. **UI & Styling**:
    - Follow the design tokens defined in `src/index.css` (Tailwind `@theme` variables such as `--color-primary-main`, `--color-canvas`, `--color-ink-primary`).
    - Do not alter existing layout, color palettes, or component styling unless requested.
-4. **Dropdowns & Selects** (two intentional patterns, do not merge them):
-   - **Form fields** (`TaskForm.tsx`, `PomodoroTimer.tsx`): use `Select` from `src/components/ui/Select.tsx` (styled native `<select>`). Native semantics are required here.
-   - **List filters** (`TaskList.tsx`): use the local `FilterDropdown` listbox. It must keep `aria-haspopup="listbox"`, `aria-expanded`, `aria-controls`, `role="listbox"`/`role="option"`, `aria-selected`, outside-click close, and Arrow/Enter/Space/Escape keyboard handling. Never downgrade it back to a native select.
-   - Keep `FilterDropdown` local to `TaskList.tsx` until a second consumer needs it; extract then, not before.
+4. **Dropdowns & Selects** (two intentional patterns, do not merge or duplicate):
+   - **Shared listbox** (`src/components/ui/Dropdown.tsx`): generic `Dropdown<T extends string>` taking `value`, `onChange`, `options: DropdownOption<T>[]`, `ariaLabel`, and optional `icon` / `fullWidth`. Used by the `TaskForm.tsx` Project field (`fullWidth`) and every `TaskList.tsx` filter/sort control. It must keep `aria-haspopup="listbox"`, `aria-expanded`, `aria-controls`, `role="listbox"`/`role="option"`, `aria-selected`, outside-click close, and Arrow/Enter/Space/Escape keyboard handling. Never downgrade it to a native select and never reintroduce a local `FilterDropdown`.
+   - **Native select** (`src/components/ui/Select.tsx`): styled native `<select>` for the remaining picker (`PomodoroTimer.tsx` task linker). Native semantics are preserved there.
 5. **Agent Guardrails**:
    - Always confirm file paths before editing.
    - Never delete existing components, files, or data schemas without user confirmation.
    - Always verify changes with `npm run build` before finalizing tasks.
+   - When a change alters domain behavior or a shared UI contract (`Dropdown`, `Select`, storage schema), update `AGENTS.md`, `PRODUCT.md`, and `DESIGN.md` in the same change so the docs never drift from the code.
+   - `agent.yaml` is outside this repository's documentation scope: do not read, update, or include it in consistency checks.
 
 - Data Backup & Portability (`storageService.exportData` and `storageService.importData`):
   - **Export Payload**: `{ version: 1, exportedAt: ISO string, data: { tasks, projects, sessions, timer } }`. File output: `focusflow-backup-YYYY-MM-DD.json`.
