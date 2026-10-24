@@ -32,6 +32,7 @@
   - **Overdue**: Shows active incomplete tasks past their due date.
   - **Completed**: Shows all completed tasks regardless of date.
 - **Search & Filtering**: Real-time text search (title, description, tags), project filter dropdown, priority filter dropdown, and multi-field sorting (Due Date, Priority, Creation Date).
+- **Filter Controls**: List filters render as custom accessible listbox dropdowns (ARIA + full keyboard support) so every filter stays usable and readable on desktop and mobile; task form and timer task pickers use styled native selects.
 - **Task Actions**: Complete/Uncomplete toggle, inline timer trigger, edit modal, and delete confirmation.
 
 ### 3. Focus Timer (`PomodoroTimer.tsx`)
@@ -109,3 +110,4 @@ interface FocusSession {
 2. **Offline Local Storage**: All state is initialized from and saved to browser `localStorage` using keys prefixed with `focusflow_`. Profile data uses `focusflow_profile_v1` and is not part of export/import payloads.
 3. **Responsive SPA Layout**: Sidebar navigation for desktop and bottom/drawer navigation for mobile views.
 4. **Single Greeting Source**: The Overview greeting always uses the persisted profile name; never hardcode a display name in components.
+5. **Keyboard-Accessible Filters**: Every filter/sort control in the Tasks view must be operable without a mouse (open, navigate, select, escape) and expose correct ARIA listbox semantics.

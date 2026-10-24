@@ -31,6 +31,7 @@ src/
 │   ├── projects/         # ProjectCard and ProjectForm components
 │   ├── timer/            # PomodoroTimer component
 │   ├── settings/         # SettingsView (profile + data backup/restore)
+│   ├── ui/               # Select: styled native <select> for form fields
 │   └── layout/           # AppShell, Sidebar, PageHeader, MobileNavigation, Toast, ConfirmDialog
 ├── App.tsx               # Root component managing global state, active tab views, & modal state
 ├── index.css             # Tailwind v4 import & custom CSS variable theme definitions
@@ -74,7 +75,11 @@ src/
 3. **UI & Styling**:
    - Follow the design tokens defined in `src/index.css` (Tailwind `@theme` variables such as `--color-primary-main`, `--color-canvas`, `--color-ink-primary`).
    - Do not alter existing layout, color palettes, or component styling unless requested.
-4. **Agent Guardrails**:
+4. **Dropdowns & Selects** (two intentional patterns, do not merge them):
+   - **Form fields** (`TaskForm.tsx`, `PomodoroTimer.tsx`): use `Select` from `src/components/ui/Select.tsx` (styled native `<select>`). Native semantics are required here.
+   - **List filters** (`TaskList.tsx`): use the local `FilterDropdown` listbox. It must keep `aria-haspopup="listbox"`, `aria-expanded`, `aria-controls`, `role="listbox"`/`role="option"`, `aria-selected`, outside-click close, and Arrow/Enter/Space/Escape keyboard handling. Never downgrade it back to a native select.
+   - Keep `FilterDropdown` local to `TaskList.tsx` until a second consumer needs it; extract then, not before.
+5. **Agent Guardrails**:
    - Always confirm file paths before editing.
    - Never delete existing components, files, or data schemas without user confirmation.
    - Always verify changes with `npm run build` before finalizing tasks.
