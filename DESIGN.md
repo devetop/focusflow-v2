@@ -94,6 +94,15 @@ h1, h2, h3, h4, h5, h6 {
 - Active swatch (preset or custom): `ring-2 ring-offset-2 ring-[#7657D9] scale-110`; inactive hover: `hover:scale-105`.
 - Custom swatch: same size, `border border-[#F0EDE8]`, `Pipette` icon (`w-4 h-4 text-white drop-shadow-xs`) over an invisible native `<input type="color">` (`absolute inset-0 opacity-0`, `aria-label="Custom theme color"`, `focus-within:ring-2`). Background shows the picked color when custom, `#7657D9` when a preset is active.
 
+### F. Focus Timer View (`PomodoroTimer.tsx`)
+- Header: breadcrumb `Workspace / Focus Timer` (`text-[11px] uppercase`), `Deep Focus Room` headline, and a status pill (`bg-white border-[#F0EDE8] rounded-full`) with a pulsing dot only while running (`bg-[#7657D9]`) plus `N Streak` in primary.
+- Layout: `grid grid-cols-1 lg:grid-cols-12` — console `lg:col-span-7`, right rail `lg:col-span-5`.
+- Console card: white, `rounded-3xl`, hairline border, soft lavender radial glow. Mode tabs sit on an `#F5F2EE` pill, active tab `bg-[#7657D9] text-white`.
+- Dial: 260-unit SVG, track `#EFEBFC`, progress `#7657D9`, `stroke-width=10`, round caps; centered badge (`#F5F2EE` pill), `text-[56px]` tabular countdown, and `Single-task cadence` caption.
+- Controls: Reset/Skip are `bg-[#F5F2EE]` pills; the primary Start/Pause is `flex-[1.6]`, `bg-[#7657D9]`, `rounded-full`, `shadow-[#7657D9]/25`.
+- Right rail: 3-up metric tiles (`rounded-2xl`), Sound & Space card (2×4 ambient pills; active `bg-[#E9DDFF] text-[#441F8D]`; 40×24 toggle switches with white knob), and Flow Log timeline (4px dot on a 2px `#F0EDE8` rail, `#FCFAF8` rows).
+- Ambient FX selection is visual only; no audio assets are bundled.
+
 ---
 
 ## 5. Responsive Design Rules

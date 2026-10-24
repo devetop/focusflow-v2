@@ -378,20 +378,17 @@ export function App() {
       )}
 
       {currentView === 'timer' && (
-        <div>
-          <PageHeader
-            title="Focus Timer"
-            subtitle="Use the Pomodoro technique to boost concentration and prevent burnout."
-          />
-          <PomodoroTimer
-            tasks={tasks}
-            activeTask={activeTaskForTimer}
-            onSelectTask={setActiveTaskForTimer}
-            onSessionComplete={handleSessionComplete}
-            savedTimerState={timerState}
-            onSaveTimerState={storageService.saveTimerState}
-          />
-        </div>
+        <PomodoroTimer
+          tasks={tasks}
+          projects={projects}
+          sessions={sessions}
+          activeTask={activeTaskForTimer}
+          onSelectTask={setActiveTaskForTimer}
+          onToggleCompleteTask={handleToggleComplete}
+          onSessionComplete={handleSessionComplete}
+          savedTimerState={timerState}
+          onSaveTimerState={storageService.saveTimerState}
+        />
       )}
 
       {currentView === 'completed' && (

@@ -39,11 +39,16 @@
 - **Empty States**: Empty lists render a centered card with a lavender icon tile and a context-aware message (adjust filters when filtered/searching, completed tasks appear here on the Completed tab, otherwise prompt adding a task).
 
 ### 3. Focus Timer (`PomodoroTimer.tsx`)
+- **Layout**: "Deep Focus Room" header with live Flow Mode pill (pulsing when running) and computed day streak; two-pane 7/5 grid (focus console + active task on the left; metrics, Sound & Space, and today's flow log on the right).
 - **Timer Modes**:
   - **Focus**: 25 minutes default work interval.
   - **Short Break**: 5 minutes break.
   - **Long Break**: 15 minutes break.
-- **Task Integration**: Optionally attach the timer to a specific active task to log dedicated focus sessions.
+- **Focus Console**: Concentric SVG dial (25m focus, 5m short, 15m long) showing Session N of 4, countdown, a 4-segment target cycle meter, and Reset / Start-Pause / Skip controls.
+- **Task Integration**: A task linker (`Select`, native semantics) plus quick-complete buttons attach the timer to a specific active task and log dedicated focus sessions. With no task selected, the card reads "General Focus Session" and Done is disabled.
+- **Right Rail Metrics**: Today's focus minutes, completed pomodoros (mode `focus` only), and distinct tasks worked in flow, derived from the raw session array.
+- **Sound & Space**: Ambient FX selector (Mute / Rain / Cafe / White Noise — selection only, no audio playback) and two toggles: Bell chime at session end (Web Audio tone) and Auto-start rest intervals.
+- **Flow Log**: Reverse-chronological list of today's sessions with start–end clock times, duration, mode, and a focus/break icon (capped at 5 rows).
 - **Session Logging**: Completed focus sessions are appended to `localStorage` (`focusflow_sessions_v1`) with task link, duration, mode, and timestamp; the Overview summarises today's totals.
 - **Persisted Timer State**: Mode, remaining seconds, running flag, session count, and linked task are saved under `focusflow_timer_v1` and restored on reload.
 
