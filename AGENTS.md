@@ -81,6 +81,15 @@ src/
 
 ---
 
+### H. Focus Timer Persistence & Wall-Clock Reconciliation (`PomodoroTimer.tsx` & `App.tsx`)
+- **Centralized Timer State**: `timerState` (`mode`, `timeLeft`, `isRunning`, `totalSessionsCompletedToday`, `activeTaskId`, `lastTickTimestamp`, `chime`, `autoStartRest`) is managed globally in `App.tsx` and persisted in `localStorage` under `focusflow_timer_v1`.
+- **Component Lifecycle Independence**: `PomodoroTimer.tsx` is a view component that receives `savedTimerState` and dispatches action updates (`onSaveTimerState`). Navigating between menu views unmounts `PomodoroTimer` without resetting time, mode, or running status.
+- **Wall-Clock Reconciliation**: On app load, reload, or `visibilitychange` (tab coming to foreground), remaining time is reconciled via real wall-clock delta (`now - lastTickTimestamp`).
+- **Single-Execution Completion**: Expired timers (`elapsed >= timeLeft`) trigger `handleSessionComplete` exactly ONCE, play chime if enabled, increment session count, transition mode (focus → break; short break after focus, long break every 4 focus sessions), update `focusflow_sessions_v1`, and set next mode time with `isRunning: false` to avoid cascading sessions.
+- **Active Task Sync**: `activeTaskId` is restored to `activeTaskForTimer` only if the task exists in `tasks` and is incomplete (`!task.completed`); otherwise it safely falls back to unlinked state (`undefined`).
+
+---
+
 ## 4. Coding & Refactoring Conventions
 
 1. **React 19 & TypeScript**:
