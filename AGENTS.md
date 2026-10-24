@@ -94,8 +94,8 @@ src/
    - Follow the design tokens defined in `src/index.css` (Tailwind `@theme` variables such as `--color-primary-main`, `--color-canvas`, `--color-ink-primary`).
    - Do not alter existing layout, color palettes, or component styling unless requested.
 4. **Dropdowns & Selects** (two intentional patterns, do not merge or duplicate):
-   - **Shared listbox** (`src/components/ui/Dropdown.tsx`): generic `Dropdown<T extends string>` taking `value`, `onChange`, `options: DropdownOption<T>[]`, `ariaLabel`, and optional `icon` / `fullWidth`. Used by the `TaskForm.tsx` Project field (`fullWidth`) and every `TaskList.tsx` filter/sort control. It must keep `aria-haspopup="listbox"`, `aria-expanded`, `aria-controls`, `role="listbox"`/`role="option"`, `aria-selected`, outside-click close, and Arrow/Enter/Space/Escape keyboard handling. Never downgrade it to a native select and never reintroduce a local `FilterDropdown`.
-   - **Native select** (`src/components/ui/Select.tsx`): styled native `<select>` for the remaining picker (`PomodoroTimer.tsx` task linker). Native semantics are preserved there.
+   - **Shared listbox** (`src/components/ui/Dropdown.tsx`): generic `Dropdown<T extends string>` taking `value`, `onChange`, `options: DropdownOption<T>[]`, `ariaLabel`, and optional `icon` / `fullWidth`. Used by the `TaskForm.tsx` Project field (`fullWidth`), every `TaskList.tsx` filter/sort control, and the `PomodoroTimer.tsx` task linker (`fullWidth`). It must keep `aria-haspopup="listbox"`, `aria-expanded`, `aria-controls`, `role="listbox"`/`role="option"`, `aria-selected`, outside-click close, and Arrow/Enter/Space/Escape keyboard handling. Never downgrade it to a native select and never reintroduce a local `FilterDropdown`.
+   - **Native select** (`src/components/ui/Select.tsx`): styled native `<select>`. `Select.tsx` is no longer in active use as the timer task linker now uses the shared `Dropdown`.
 5. **Agent Guardrails**:
    - Always confirm file paths before editing.
    - Never delete existing components, files, or data schemas without user confirmation.

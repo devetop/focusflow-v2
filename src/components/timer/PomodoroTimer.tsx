@@ -20,7 +20,7 @@ import {
   CheckCircle2,
   Volume2,
 } from 'lucide-react';
-import { Select } from '../ui/Select';
+import { Dropdown, type DropdownOption } from '../ui/Dropdown';
 import { getTodayDateString } from '../../utils/date';
 
 interface PomodoroTimerProps {
@@ -206,6 +206,10 @@ export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
   const cycleIndex = (sessionCount % 4) + 1;
   const untilLongBreak = 4 - (sessionCount % 4);
   const availableTasks = tasks.filter((t) => !t.completed);
+  const taskLinkOptions: DropdownOption<string>[] = [
+    { value: '', label: 'No task' },
+    ...availableTasks.map((t) => ({ value: t.id, label: t.title })),
+  ];
   const project = projects.find((p) => p.id === activeTask?.projectId);
 
   const todayStr = getTodayDateString();
@@ -422,19 +426,15 @@ export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
             </div>
 
             <div className="flex items-center gap-2 w-full md:w-auto justify-end flex-shrink-0">
-              <Select
-                value={activeTask?.id || ''}
-                onChange={(e) => onSelectTask(tasks.find((t) => t.id === e.target.value))}
-                aria-label="Link Focus Session To Task"
-                containerClassName="md:w-52"
-              >
-                <option value="">No task</option>
-                {availableTasks.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.title}
-                  </option>
-                ))}
-              </Select>
+              <div className="w-full md:w-52">
+                <Dropdown
+                  value={activeTask?.id || ''}
+                  onChange={(id) => onSelectTask(tasks.find((t) => t.id === id))}
+                  options={taskLinkOptions}
+                  ariaLabel="Link Focus Session To Task"
+                  fullWidth
+                />
+              </div>
               <button
                 onClick={markTaskDone}
                 disabled={!activeTask}

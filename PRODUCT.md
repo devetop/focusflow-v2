@@ -34,7 +34,7 @@
   - **Completed**: Shows all completed tasks regardless of date.
 - **Search & Filtering**: Real-time text search (title, description, tags), project filter dropdown, priority filter dropdown, and multi-field sorting (Due Date, Priority, Creation Date). Pre-filters by project when arriving from a selected project card; navigating directly from sidebar resets project filter to "All Projects".
 - **Contextual Task Creation**: Clicking "Add Task" while in a project-filtered task view automatically pre-selects that project in the task creation form (`defaultProjectId`). Users can still manually change or clear the project dropdown. Opening "Add Task" from Overview, direct "My Tasks" (All Projects), Completed, Projects, or Timer views defaults to the fallback project or unassigned state without leaking the filter. Editing an existing task always preserves the task's assigned project.
-- **Filter Controls**: Task list filters/sort use the shared accessible `Dropdown` listbox (`src/components/ui/Dropdown.tsx`, ARIA + full keyboard support); the `TaskForm` Project field uses the same `Dropdown` with `fullWidth`, and the timer task linker uses the styled native `Select`.
+- **Filter Controls**: Task list filters/sort use the shared accessible `Dropdown` listbox (`src/components/ui/Dropdown.tsx`, ARIA + full keyboard support); the `TaskForm` Project field uses the same `Dropdown` with `fullWidth`, and the timer task linker uses the shared `Dropdown`.
 - **Task Actions**: Complete/Uncomplete toggle, inline timer trigger, edit modal, and delete confirmation.
 - **Empty States**: Empty lists render a centered card with a lavender icon tile and a context-aware message (adjust filters when filtered/searching, completed tasks appear here on the Completed tab, otherwise prompt adding a task).
 
@@ -45,7 +45,7 @@
   - **Short Break**: 5 minutes break.
   - **Long Break**: 15 minutes break.
 - **Focus Console**: Concentric SVG dial (25m focus, 5m short, 15m long) showing Session N of 4, countdown, a 4-segment target cycle meter, and Reset / Start-Pause / Skip controls.
-- **Task Integration**: A task linker (`Select`, native semantics) plus quick-complete buttons attach the timer to a specific active task and log dedicated focus sessions. With no task selected, the card reads "General Focus Session" and Done is disabled.
+- **Task Integration**: A task linker (`Dropdown`, shared listbox) plus quick-complete buttons attach the timer to a specific active task and log dedicated focus sessions. With no task selected, the card reads "General Focus Session" and Done is disabled.
 - **Right Rail Metrics**: Today's focus minutes, completed pomodoros (mode `focus` only), and distinct tasks worked in flow, derived from the raw session array.
 - **Sound & Space**: Ambient FX selector (Mute / Rain / Cafe / White Noise — selection only, no audio playback) and two toggles: Bell chime at session end (Web Audio tone) and Auto-start rest intervals.
 - **Flow Log**: Reverse-chronological list of today's sessions with start–end clock times, duration, mode, and a focus/break icon (capped at 5 rows).
