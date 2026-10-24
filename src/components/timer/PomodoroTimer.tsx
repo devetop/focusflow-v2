@@ -293,7 +293,7 @@ export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
           }}
           aria-label="Link Focus Session To Task"
         >
-          <option value="">-- General Focus Session (No specific task) --</option>
+          <option value="">No task (general)</option>
           {availableTasks.map((t) => (
             <option key={t.id} value={t.id}>
               {t.title} ({t.estimatedMinutes}m est)

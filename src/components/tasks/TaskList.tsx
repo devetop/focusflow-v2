@@ -84,7 +84,7 @@ export const TaskList: React.FC<TaskListProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search tasks or tags..."
-            className="w-full pl-9 pr-4 py-2 rounded-xl bg-[#FCFAF8] border border-[#F0EDE8] focus:border-[#7657D9] focus:outline-none text-xs font-semibold text-[#2A2538]"
+            className="w-full h-9 pl-9 pr-4 rounded-xl bg-[#FCFAF8] border border-[#F0EDE8] focus:border-[#7657D9] focus-visible:ring-2 focus-visible:ring-[#7657D9]/20 focus:outline-none text-xs font-semibold text-[#2A2538]"
           />
         </div>
 
@@ -94,7 +94,7 @@ export const TaskList: React.FC<TaskListProps> = ({
             value={selectedProjectId}
             onChange={(e) => setSelectedProjectId(e.target.value)}
             aria-label="Filter by project"
-            containerClassName="w-auto"
+            containerClassName="w-full sm:w-auto min-w-[130px]"
           >
             <option value="all">All Projects</option>
             {projects.map((p) => (
@@ -108,7 +108,7 @@ export const TaskList: React.FC<TaskListProps> = ({
             value={selectedPriority}
             onChange={(e) => setSelectedPriority(e.target.value)}
             aria-label="Filter by priority"
-            containerClassName="w-auto"
+            containerClassName="w-full sm:w-auto min-w-[120px]"
           >
             <option value="all">All Priorities</option>
             <option value="high">High</option>
@@ -121,7 +121,7 @@ export const TaskList: React.FC<TaskListProps> = ({
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'dueDate' | 'priority' | 'createdAt')}
             aria-label="Sort tasks"
-            containerClassName="w-auto"
+            containerClassName="w-full sm:w-auto min-w-[140px]"
           >
             <option value="dueDate">Sort: Due Date</option>
             <option value="priority">Sort: Priority</option>
