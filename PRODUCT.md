@@ -50,7 +50,7 @@
 - **Sound & Space**: Ambient FX selector (Mute / Rain / Cafe / White Noise — selection only, no audio playback) and two toggles: Bell chime at session end (Web Audio tone) and Auto-start rest intervals.
 - **Flow Log**: Reverse-chronological list of today's sessions with start–end clock times, duration, mode, and a focus/break icon (capped at 5 rows).
 - **Session Logging**: Completed focus sessions are appended to `localStorage` (`focusflow_sessions_v1`) with task link, duration, mode, and timestamp; the Overview summarises today's totals.
-- **Persisted Timer State**: Mode, remaining seconds, running flag, session count, and linked task are saved under `focusflow_timer_v1` and restored on reload.
+- **Persisted Timer State**: Mode, remaining seconds, running flag, session count, and linked task are saved under `focusflow_timer_v1`. State calculation is wall-clock based and centralized in `App.tsx`, preserving running status and remaining time across view navigation, browser reloads, and tab throttling (`visibilitychange`). Expired timers process session logging exactly once upon load or reconciliation.
 
 ### 4. Settings & Data Management (`SettingsView.tsx`)
 - **Profile Details**: Edit the display name used in the Overview greeting. Trimmed, 1–40 characters, defaults to `'Alex'`. Saved immediately to `localStorage` (`focusflow_profile_v1`) with a toast confirmation.

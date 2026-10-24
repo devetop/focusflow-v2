@@ -2,6 +2,14 @@
 
 This repository contains **FocusFlow v2**, a modern productivity dashboard built with **React 19**, **TypeScript**, **Vite**, and **Tailwind CSS (v4)**.
 
+
+### H. Focus Timer Persistence & Wall-Clock Reconciliation (`PomodoroTimer.tsx` & `App.tsx`)
+- **Centralized Timer State**: `timerState` (`mode`, `timeLeft`, `isRunning`, `totalSessionsCompletedToday`, `activeTaskId`, `lastTickTimestamp`, `chime`, `autoStartRest`) is managed globally in `App.tsx` and persisted in `localStorage` under `focusflow_timer_v1`.
+- **Component Lifecycle Independence**: `PomodoroTimer.tsx` is a view component that receives `savedTimerState` and dispatches action updates (`onSaveTimerState`). Navigating between menu views unmounts `PomodoroTimer` without resetting time, mode, or running status.
+- **Wall-Clock Reconciliation**: On app load, reload, or `visibilitychange` (tab coming to foreground), remaining time is reconciled via real wall-clock delta (`now - lastTickTimestamp`).
+- **Single-Execution Completion**: Expired timers (`elapsed >= timeLeft`) trigger `handleSessionComplete` exactly ONCE, play chime if enabled, increment session count, transition mode (focus → break; short break after focus, long break every 4 focus sessions), update `focusflow_sessions_v1`, and set next mode time with `isRunning: false` to avoid cascading sessions.
+- **Active Task Sync**: `activeTaskId` is restored to `activeTaskForTimer` only if the task exists in `tasks` and is incomplete (`!task.completed`); otherwise it safely falls back to unlinked state (`undefined`).
+
 ---
 
 ## 1. Environment & Commands
@@ -78,6 +86,15 @@ src/
 - 7 preset swatches (see `PASTEL_COLORS`, in order: `#7657D9`, `#F3B292`, `#7CD4B0`, `#F4D06F`, `#F3A6C8`, `#6B4AB4`, `#4A90E2`) plus 1 custom native `<input type="color">` swatch (`Pipette` icon, `aria-label="Custom theme color"`).
 - All colors are normalized with `color.toLowerCase()` on selection and submit; stored values are lowercase `#rrggbb` hex strings.
 - Active swatch: `ring-2 ring-offset-2 ring-[#7657D9] scale-110`. The custom swatch shows the current color when custom and the primary purple (`#7657D9`) when a preset is selected.
+
+---
+
+### H. Focus Timer Persistence & Wall-Clock Reconciliation (`PomodoroTimer.tsx` & `App.tsx`)
+- **Centralized Timer State**: `timerState` (`mode`, `timeLeft`, `isRunning`, `totalSessionsCompletedToday`, `activeTaskId`, `lastTickTimestamp`, `chime`, `autoStartRest`) is managed globally in `App.tsx` and persisted in `localStorage` under `focusflow_timer_v1`.
+- **Component Lifecycle Independence**: `PomodoroTimer.tsx` is a view component that receives `savedTimerState` and dispatches action updates (`onSaveTimerState`). Navigating between menu views unmounts `PomodoroTimer` without resetting time, mode, or running status.
+- **Wall-Clock Reconciliation**: On app load, reload, or `visibilitychange` (tab coming to foreground), remaining time is reconciled via real wall-clock delta (`now - lastTickTimestamp`).
+- **Single-Execution Completion**: Expired timers (`elapsed >= timeLeft`) trigger `handleSessionComplete` exactly ONCE, play chime if enabled, increment session count, transition mode (focus → break; short break after focus, long break every 4 focus sessions), update `focusflow_sessions_v1`, and set next mode time with `isRunning: false` to avoid cascading sessions.
+- **Active Task Sync**: `activeTaskId` is restored to `activeTaskForTimer` only if the task exists in `tasks` and is incomplete (`!task.completed`); otherwise it safely falls back to unlinked state (`undefined`).
 
 ---
 
