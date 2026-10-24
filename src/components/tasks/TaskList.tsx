@@ -12,6 +12,7 @@ interface TaskListProps {
   onDelete: (id: string) => void;
   onStartTimer?: (task: Task) => void;
   initialTab?: TaskFilterTab;
+  initialProjectId?: string;
 }
 
 interface FilterDropdownOption<T extends string> {
@@ -167,10 +168,11 @@ export const TaskList: React.FC<TaskListProps> = ({
   onDelete,
   onStartTimer,
   initialTab = 'all',
+  initialProjectId = 'all',
 }) => {
   const [activeTab, setActiveTab] = useState<TaskFilterTab>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedProjectId, setSelectedProjectId] = useState<string>('all');
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(initialProjectId);
   const [selectedPriority, setSelectedPriority] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'dueDate' | 'priority' | 'createdAt'>('dueDate');
 

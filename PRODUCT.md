@@ -21,7 +21,7 @@
 
 ### 1. Overview Dashboard (`OverviewDashboard.tsx`)
 - High-level productivity metrics: Total tasks, completed today, pending count, and focus minutes logged.
-- Quick summary of active projects with completion progress bars.
+- Quick summary of active projects with completion progress bars. Clicking any project card or its "View All Tasks" button navigates to My Tasks pre-filtered to that project's tasks.
 - Quick-access list for high-priority tasks.
 
 ### 2. My Tasks (`TaskList.tsx`, `TaskItem.tsx`, `TaskForm.tsx`)
@@ -31,7 +31,7 @@
   - **Upcoming**: Shows active incomplete tasks due in the future.
   - **Overdue**: Shows active incomplete tasks past their due date.
   - **Completed**: Shows all completed tasks regardless of date.
-- **Search & Filtering**: Real-time text search (title, description, tags), project filter dropdown, priority filter dropdown, and multi-field sorting (Due Date, Priority, Creation Date).
+- **Search & Filtering**: Real-time text search (title, description, tags), project filter dropdown, priority filter dropdown, and multi-field sorting (Due Date, Priority, Creation Date). Pre-filters by project when arriving from a selected project card; navigating directly from sidebar resets project filter to "All Projects".
 - **Filter Controls**: List filters render as custom accessible listbox dropdowns (ARIA + full keyboard support) so every filter stays usable and readable on desktop and mobile; task form and timer task pickers use styled native selects.
 - **Task Actions**: Complete/Uncomplete toggle, inline timer trigger, edit modal, and delete confirmation.
 
