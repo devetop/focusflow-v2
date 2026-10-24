@@ -60,6 +60,7 @@ src/
 - **Project Selection**: Clicking anywhere on a project card (`ProjectCard.tsx`) or its "View All Tasks" button (both in Overview and Projects views) sets `taskProjectFilter` state in `App.tsx` to that project's ID and switches view to `'tasks'`.
 - **Pre-Filtered Task View**: `TaskList.tsx` accepts an optional `initialProjectId?: string` prop to seed `selectedProjectId`.
 - **Filter Reset on Direct Nav**: Navigating to My Tasks directly via Sidebar, MobileNavigation, or the Overview section header resets `taskProjectFilter` back to `'all'` so project filters do not persist unexpectedly.
+- **Task Creation Project Context**: When opening "Add Task" from a project-filtered task view (`currentView === 'tasks'` and `taskProjectFilter !== 'all'`), `defaultProjectId` MUST be set to `taskProjectFilter` and passed to `TaskForm`. In all other views or when `taskProjectFilter === 'all'`, `defaultProjectId` MUST be `undefined`. When editing an existing task, `editingTask.projectId` always takes precedence over `defaultProjectId`.
 - **Card Action Propagation**: Action menus and buttons on `ProjectCard` must call `e.stopPropagation()` so opening menus or editing/deleting projects never triggers navigation.
 
 ### E. Navigation & Settings (`ViewMode`)

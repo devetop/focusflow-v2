@@ -32,6 +32,7 @@
   - **Overdue**: Shows active incomplete tasks past their due date.
   - **Completed**: Shows all completed tasks regardless of date.
 - **Search & Filtering**: Real-time text search (title, description, tags), project filter dropdown, priority filter dropdown, and multi-field sorting (Due Date, Priority, Creation Date). Pre-filters by project when arriving from a selected project card; navigating directly from sidebar resets project filter to "All Projects".
+- **Contextual Task Creation**: Clicking "Add Task" while in a project-filtered task view automatically pre-selects that project in the task creation form (`defaultProjectId`). Users can still manually change or clear the project dropdown. Opening "Add Task" from Overview, direct "My Tasks" (All Projects), Completed, Projects, or Timer views defaults to the fallback project or unassigned state without leaking the filter. Editing an existing task always preserves the task's assigned project.
 - **Filter Controls**: List filters render as custom accessible listbox dropdowns (ARIA + full keyboard support) so every filter stays usable and readable on desktop and mobile; task form and timer task pickers use styled native selects.
 - **Task Actions**: Complete/Uncomplete toggle, inline timer trigger, edit modal, and delete confirmation.
 
