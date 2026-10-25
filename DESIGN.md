@@ -110,3 +110,13 @@ h1, h2, h3, h4, h5, h6 {
 
 - **Desktop (>= 1024px)**: Full sidebar layout with multi-column task / overview grid.
 - **Mobile (< 768px)**: Bottom navigation bar or hamburger menu, full-width single-column task list with scrollable horizontal tab bar (`overflow-x-auto`).
+
+---
+
+## 6. Static Serving & Deployment Surface
+
+- The UI ships as the prebuilt `dist/` bundle served by `nginx:alpine` at container port 80 (host `8080`). No SSR, no runtime config, no server-rendered shell.
+- `index.html` is the only document; navigation is `ViewMode` state, so no server rewrite rules exist. Add `try_files $uri $uri/ /index.html;` only if URL-based routing is introduced.
+- Keep Vite's default root-absolute asset paths (`/assets/...`) so the bundle works unchanged at the container root.
+- Fonts still load from Google Fonts via `index.html`; containerizing does not bundle or self-host them.
+- Styling stays in `src/index.css` tokens: no nginx error-page theming or container-level visual customization.

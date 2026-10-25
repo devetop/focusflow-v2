@@ -10,6 +10,8 @@ This repository contains **FocusFlow v2**, a modern productivity dashboard built
 - **Build Command**: `npm run build` (Runs `tsc -b` and `vite build`)
 - **Lint Command**: `npm run lint` (Runs `oxlint`)
 - **Dev Server**: `npm run dev`
+- **Container Up**: `docker compose up -d --build` (builds `focusflow:local`, serves `dist/` via nginx on `http://localhost:8080`)
+- **Container Down**: `docker compose down`
 
 > **Crucial Rule**: Before submitting any pull request or finishing a task, always run `npm run build` to verify there are zero TypeScript compilation or bundle errors.
 
@@ -124,3 +126,15 @@ src/
    - Splitting a component or service file is a structural change: update the tree in section 2 and the section that names the component in the same commit.
 6. **Date Handling**: Day keys always come from `getLocalDateString()` (local time). Never derive a day with `toISOString().slice(0, 10)` or `completedAt.startsWith(todayStr)` — those are UTC-based and mislabel sessions around midnight.
    - `agent.yaml` is outside this repository's documentation scope: do not read, update, or include it in consistency checks.
+
+---
+
+## 5. Container Deployment (root `Dockerfile`, `docker-compose.yaml`, `.dockerignore`)
+
+- **Two stages only**: `node:24-alpine` (`npm ci` → `npm run build`) then `nginx:alpine` copying `/app/dist` to `/usr/share/nginx/html`. Major tags only, no extra images, services, or npm dependencies.
+- **No custom `nginx.conf`**: the SPA has no `react-router` and no `import.meta.env` usage, so the default nginx config is sufficient. If URL routing is ever added, add exactly one small conf with `try_files $uri $uri/ /index.html;` and nothing else.
+- **Compose contract**: single `app` service, `build: .`, `image: focusflow:local`, `ports: "8080:80"`, `restart: unless-stopped`, and no `version:` key.
+- **Build output path is part of the contract**: changing Vite's `outDir`/`dist` layout requires updating the Dockerfile `COPY --from=build` line in the same change.
+- **Guardrails**: no secrets, no unused `ARG`, no entrypoint script, no `node_modules`/`dist`/`agent_memory.db*`/`memory.lock`/`agent.yaml` in the build context (see `.dockerignore`).
+- **Verification**: `docker compose up -d --build` → `docker compose ps` shows `running`, `curl -sI http://localhost:8080` returns `200`, `curl -s http://localhost:8080 | grep -c 'id="root"'` ≥ `1`, then `docker compose down`. `npm run build` must stay green too.
+- Changing the container setup (base image, port mapping, served path) requires updating this section plus the Deployment sections of `PRODUCT.md` and `DESIGN.md` in the same change.

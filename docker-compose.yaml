@@ -1,0 +1,9 @@
+services:
+  app:
+    build: .
+    image: focusflow:local
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Jakarta
