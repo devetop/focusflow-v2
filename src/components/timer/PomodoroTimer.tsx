@@ -1,6 +1,6 @@
 import React from "react";
 import type { Task, Project, TimerMode, TimerState, FocusSession } from "../../types";
-import { Flame, Clock, Brain, ListTodo } from "lucide-react";
+import { Clock, Brain, ListTodo, Flame } from "lucide-react";
 import type { DropdownOption } from "../ui/Dropdown";
 import { getTodayDateString } from "../../utils/date";
 import { TimerDisplay } from "./TimerDisplay";
@@ -38,7 +38,6 @@ export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
   const mode = savedTimerState?.mode || "focus";
   const timeLeft = savedTimerState?.timeLeft ?? MODE_DURATIONS.focus;
   const isRunning = savedTimerState?.isRunning ?? false;
-  const sessionCount = savedTimerState?.totalSessionsCompletedToday ?? 0;
   const chime = savedTimerState?.chime ?? true;
   const autoStartRest = savedTimerState?.autoStartRest ?? false;
 
@@ -84,13 +83,23 @@ export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
 
   const todayStr = getTodayDateString();
   const todaySessions = sessions.filter((s) => s.completedAt && s.completedAt.startsWith(todayStr));
+  const focusSessions = todaySessions.filter((s) => s.mode === 'focus');
+  const focusMinutes = focusSessions.reduce((acc, s) => acc + s.durationMinutes, 0);
+  const tasksInFlow = new Set(focusSessions.map((s) => s.taskId).filter(Boolean)).size;
 
-  const totalFocusMinutes = todaySessions.reduce((acc, s) => acc + s.durationMinutes, 0);
+  // Consecutive days with at least one logged session, counting back from today.
+  const dayKeys = new Set(sessions.map((s) => s.completedAt.slice(0, 10)));
+  let streak = 0;
+  const cursor = new Date();
+  while (dayKeys.has(cursor.toISOString().slice(0, 10))) {
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
 
   const metrics: MetricCard[] = [
-    { label: "Daily Target", value: `${sessionCount}/8`, caption: "Sessions done today", icon: Flame, tone: "text-[#7657D9]" },
-    { label: "Focus Time", value: `${totalFocusMinutes}m`, caption: "Deep work minutes", icon: Clock, tone: "text-[#7CD4B0]" },
-    { label: "Focus Level", value: "High", caption: "92% flow efficiency", icon: Brain, tone: "text-[#F4D06F]" },
+    { label: "Time", value: `${focusMinutes}m`, caption: "Focus today", icon: Clock, tone: "text-[#7657D9]" },
+    { label: "Pomos", value: String(focusSessions.length), caption: "Completed", icon: Brain, tone: "text-[#976247]" },
+    { label: "Tasks", value: String(tasksInFlow), caption: "In flow", icon: ListTodo, tone: "text-[#6B4AB4]" },
   ];
 
   const markTaskDone = () => {
@@ -107,16 +116,40 @@ export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
           <span className="text-xs font-bold uppercase tracking-wider text-[#7657D9]">Focus &amp; Flow State</span>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-[#2A2538] tracking-tight mt-0.5">Pomodoro Timer</h1>
         </div>
-        <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-[#F0EDE8] shadow-2xs self-start sm:self-auto">
-          <ListTodo className="w-4 h-4 text-[#7657D9]" />
+        <div className="flex items-center gap-2 bg-white border border-[#F0EDE8] px-4 py-2.5 rounded-full shadow-xs self-start md:self-auto">
+          <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
+            <span
+              className={`absolute inline-flex h-full w-full rounded-full bg-[#9B7AE8] ${
+                isRunning ? 'animate-ping opacity-75' : 'opacity-0'
+              }`}
+            />
+            <span
+              className={`relative inline-flex h-2.5 w-2.5 rounded-full ${
+                isRunning ? 'bg-[#7657D9]' : 'bg-[#D9D3CC]'
+              }`}
+            />
+          </span>
           <span className="text-xs font-bold text-[#2A2538]">
-            {activeTask ? `Linked: ${activeTask.title}` : "No task linked"}
+            {isRunning ? 'Flow Mode Active' : 'Flow Paused'}
+          </span>
+          <span className="text-[#D9D3CC] text-xs">|</span>
+          <span className="flex items-center gap-1.5 text-[#7657D9] text-xs font-bold">
+            <Flame className="w-3.5 h-3.5 fill-current" />
+            {streak} Streak
           </span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-7 flex flex-col gap-6">
+          <TimerTaskLinker
+            activeTask={activeTask}
+            project={project}
+            tasks={tasks}
+            taskLinkOptions={taskLinkOptions}
+            onSelectTask={onSelectTask}
+            onMarkTaskDone={markTaskDone}
+          />
           <TimerDisplay
             mode={mode}
             timeLeft={timeLeft}
@@ -126,14 +159,6 @@ export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
             onToggleTimer={handleToggleTimer}
             onResetTimer={handleResetTimer}
             onSkipSession={handleSkipSession}
-          />
-          <TimerTaskLinker
-            activeTask={activeTask}
-            project={project}
-            tasks={tasks}
-            taskLinkOptions={taskLinkOptions}
-            onSelectTask={onSelectTask}
-            onMarkTaskDone={markTaskDone}
           />
         </div>
 

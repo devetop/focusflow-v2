@@ -1,6 +1,6 @@
 import React from "react";
 import type { Task, Project } from "../../types";
-import { Check, Clock, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { Dropdown, type DropdownOption } from "../ui/Dropdown";
 
 interface TimerTaskLinkerProps {
@@ -27,14 +27,6 @@ export const TimerTaskLinker: React.FC<TimerTaskLinkerProps> = ({
   return (
     <div className="bg-white rounded-3xl border border-[#F0EDE8] shadow-xs p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div className="flex items-start gap-3 min-w-0">
-        <button
-          onClick={onMarkTaskDone}
-          disabled={!activeTask}
-          className="mt-0.5 w-6 h-6 rounded-lg bg-[#F5F2EE] hover:bg-[#E9DDFF] text-[#7657D9] flex items-center justify-center transition-colors flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
-          aria-label="Mark task complete"
-        >
-          <Check className="w-4 h-4" />
-        </button>
         <div className="flex flex-col min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <span className="text-[11px] font-bold uppercase tracking-wide text-[#9E98AB]">Working on</span>
@@ -48,7 +40,6 @@ export const TimerTaskLinker: React.FC<TimerTaskLinkerProps> = ({
             {activeTask ? activeTask.title : "General Focus Session"}
           </p>
           <span className="text-xs text-[#6D677D] flex items-center gap-1 mt-0.5">
-            <Clock className="w-3.5 h-3.5" />
             {activeTask
               ? `Estimated: ${estimatedPomos} pomodoro${estimatedPomos === 1 ? "" : "s"}`
               : "No task linked to this session"}
