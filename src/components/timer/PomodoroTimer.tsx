@@ -2,7 +2,7 @@ import React from "react";
 import type { Task, Project, TimerMode, TimerState, FocusSession } from "../../types";
 import { Clock, Brain, ListTodo, Flame } from "lucide-react";
 import type { DropdownOption } from "../ui/Dropdown";
-import { getTodayDateString } from "../../utils/date";
+import { getLocalDateString } from "../../utils/date";
 import { TimerDisplay } from "./TimerDisplay";
 import { TimerTaskLinker } from "./TimerTaskLinker";
 import { TimerSoundLog, type MetricCard } from "./TimerSoundLog";
@@ -24,6 +24,35 @@ const MODE_DURATIONS: Record<TimerMode, number> = {
   shortBreak: 5 * 60,
   longBreak: 15 * 60,
 };
+
+function computeStreak(sessions: FocusSession[]): number {
+  const dayKeys = new Set(
+    sessions
+      .filter((s) => s.completedAt)
+      .map((s) => getLocalDateString(new Date(s.completedAt)))
+  );
+
+  const todayKey = getLocalDateString();
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayKey = getLocalDateString(yesterday);
+
+  let cursor: Date | null = null;
+  if (dayKeys.has(todayKey)) {
+    cursor = new Date();
+  } else if (dayKeys.has(yesterdayKey)) {
+    cursor = yesterday;
+  }
+
+  let streak = 0;
+  if (cursor) {
+    while (dayKeys.has(getLocalDateString(cursor))) {
+      streak += 1;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+  }
+  return streak;
+}
 
 export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
   tasks,
@@ -81,20 +110,31 @@ export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
     ...openTasks.map((t) => ({ value: t.id, label: t.title })),
   ];
 
-  const todayStr = getTodayDateString();
-  const todaySessions = sessions.filter((s) => s.completedAt && s.completedAt.startsWith(todayStr));
-  const focusSessions = todaySessions.filter((s) => s.mode === 'focus');
+  const [todayDate, setTodayDate] = React.useState(() => getLocalDateString());
+
+  React.useEffect(() => {
+    const handleReconcile = () => {
+      if (document.visibilityState === "visible") {
+        setTodayDate(getLocalDateString());
+      }
+    };
+    document.addEventListener("visibilitychange", handleReconcile);
+    window.addEventListener("focus", handleReconcile);
+    return () => {
+      document.removeEventListener("visibilitychange", handleReconcile);
+      window.removeEventListener("focus", handleReconcile);
+    };
+  }, []);
+
+  const todayStr = todayDate;
+  const todaySessions = sessions.filter(
+    (s) => s.completedAt && getLocalDateString(new Date(s.completedAt)) === todayStr
+  );
+  const focusSessions = todaySessions.filter((s) => s.mode === "focus");
   const focusMinutes = focusSessions.reduce((acc, s) => acc + s.durationMinutes, 0);
   const tasksInFlow = new Set(focusSessions.map((s) => s.taskId).filter(Boolean)).size;
 
-  // Consecutive days with at least one logged session, counting back from today.
-  const dayKeys = new Set(sessions.map((s) => s.completedAt.slice(0, 10)));
-  let streak = 0;
-  const cursor = new Date();
-  while (dayKeys.has(cursor.toISOString().slice(0, 10))) {
-    streak += 1;
-    cursor.setDate(cursor.getDate() - 1);
-  }
+  const streak = computeStreak(sessions);
 
   const metrics: MetricCard[] = [
     { label: "Time", value: `${focusMinutes}m`, caption: "Focus today", icon: Clock, tone: "text-[#7657D9]" },
