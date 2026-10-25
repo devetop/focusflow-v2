@@ -25,21 +25,21 @@ const MODE_DURATIONS: Record<TimerMode, number> = {
   longBreak: 15 * 60,
 };
 
-function computeStreak(sessions: FocusSession[]): number {
+function computeStreak(sessions: FocusSession[], currentDate: Date = new Date()): number {
   const dayKeys = new Set(
     sessions
       .filter((s) => s.completedAt)
       .map((s) => getLocalDateString(new Date(s.completedAt)))
   );
 
-  const todayKey = getLocalDateString();
-  const yesterday = new Date();
+  const todayKey = getLocalDateString(currentDate);
+  const yesterday = new Date(currentDate);
   yesterday.setDate(yesterday.getDate() - 1);
   const yesterdayKey = getLocalDateString(yesterday);
 
   let cursor: Date | null = null;
   if (dayKeys.has(todayKey)) {
-    cursor = new Date();
+    cursor = new Date(currentDate);
   } else if (dayKeys.has(yesterdayKey)) {
     cursor = yesterday;
   }
@@ -110,34 +110,46 @@ export const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
     ...openTasks.map((t) => ({ value: t.id, label: t.title })),
   ];
 
-  const [todayDate, setTodayDate] = React.useState(() => getLocalDateString());
+  const [now, setNow] = React.useState(() => new Date());
 
   React.useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(new Date());
+    }, 30000);
+
     const handleReconcile = () => {
       if (document.visibilityState === "visible") {
-        setTodayDate(getLocalDateString());
+        setNow(new Date());
       }
     };
     document.addEventListener("visibilitychange", handleReconcile);
     window.addEventListener("focus", handleReconcile);
     return () => {
+      clearInterval(interval);
       document.removeEventListener("visibilitychange", handleReconcile);
       window.removeEventListener("focus", handleReconcile);
     };
   }, []);
 
-  const todayStr = todayDate;
+  const todayStr = getLocalDateString(now);
   const todaySessions = sessions.filter(
     (s) => s.completedAt && getLocalDateString(new Date(s.completedAt)) === todayStr
   );
   const focusSessions = todaySessions.filter((s) => s.mode === "focus");
   const focusMinutes = focusSessions.reduce((acc, s) => acc + s.durationMinutes, 0);
+
+  const elapsedMinutes =
+    mode === "focus" && isRunning
+      ? Math.max(0, Math.floor((MODE_DURATIONS.focus - timeLeft) / 60))
+      : 0;
+  const liveFocusMinutes = focusMinutes + elapsedMinutes;
+
   const tasksInFlow = new Set(focusSessions.map((s) => s.taskId).filter(Boolean)).size;
 
-  const streak = computeStreak(sessions);
+  const streak = computeStreak(sessions, now);
 
   const metrics: MetricCard[] = [
-    { label: "Time", value: `${focusMinutes}m`, caption: "Focus today", icon: Clock, tone: "text-[#7657D9]" },
+    { label: "Time", value: `${liveFocusMinutes}m`, caption: "Focus today", icon: Clock, tone: "text-[#7657D9]" },
     { label: "Pomos", value: String(focusSessions.length), caption: "Completed", icon: Brain, tone: "text-[#976247]" },
     { label: "Tasks", value: String(tasksInFlow), caption: "In flow", icon: ListTodo, tone: "text-[#6B4AB4]" },
   ];
