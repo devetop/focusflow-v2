@@ -3,7 +3,7 @@ import type { Task, Project, FocusSession, ViewMode } from '../../types';
 import { Plus, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { TaskItem } from '../tasks/TaskItem';
 import { ProjectCard } from '../projects/ProjectCard';
-import { getTodayDateString, getFormattedDateString, getCurrentHour, getLast7DaysDateStrings } from '../../utils/date';
+import { getTodayDateString, getFormattedDateString, getCurrentHour, getLast7DaysDateStrings, getLocalDateString } from '../../utils/date';
 import { OverviewHeroProgress } from './OverviewHeroProgress';
 import { OverviewWeeklyChart, type WeeklyDataItem } from './OverviewWeeklyChart';
 import { OverviewFocusCard } from './OverviewFocusCard';
@@ -56,15 +56,15 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
 
   const last7Days = getLast7DaysDateStrings();
   const weeklyData: WeeklyDataItem[] = last7Days.map((dateStr) => {
-    const count = tasks.filter((t) => t.completedAt && t.completedAt.startsWith(dateStr)).length;
-    const dayName = new Date(dateStr).toLocaleDateString('en-US', { weekday: 'narrow' });
+    const count = tasks.filter((t) => t.completedAt && getLocalDateString(new Date(t.completedAt)) === dateStr).length;
+    const dayName = new Date(`${dateStr}T00:00:00`).toLocaleDateString('en-US', { weekday: 'narrow' });
     return { dateStr, dayName, count };
   });
 
   const weeklyCompletedTotal = weeklyData.reduce((acc, curr) => acc + curr.count, 0);
   const activeDaysCount = weeklyData.filter((d) => d.count > 0).length;
 
-  const todaySessions = sessions.filter((s) => s.completedAt && s.completedAt.startsWith(todayStr));
+  const todaySessions = sessions.filter((s) => s.completedAt && getLocalDateString(new Date(s.completedAt)) === todayStr);
   const totalFocusMinutesToday = todaySessions.reduce((acc, s) => acc + s.durationMinutes, 0);
 
   const getProject = (projId?: string) => projects.find((p) => p.id === projId);
