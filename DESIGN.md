@@ -94,13 +94,14 @@ h1, h2, h3, h4, h5, h6 {
 - Active swatch (preset or custom): `ring-2 ring-offset-2 ring-[#7657D9] scale-110`; inactive hover: `hover:scale-105`.
 - Custom swatch: same size, `border border-[#F0EDE8]`, `Pipette` icon (`w-4 h-4 text-white drop-shadow-xs`) over an invisible native `<input type="color">` (`absolute inset-0 opacity-0`, `aria-label="Custom theme color"`, `focus-within:ring-2`). Background shows the picked color when custom, `#7657D9` when a preset is active.
 
-### F. Focus Timer View (`PomodoroTimer.tsx`)
-- Header: breadcrumb `Workspace / Focus Timer` (`text-[11px] uppercase`), `Deep Focus Room` headline, and a status pill (`bg-white border-[#F0EDE8] rounded-full`) with a pulsing dot only while running (`bg-[#7657D9]`) plus `N Streak` in primary.
-- Layout: `grid grid-cols-1 lg:grid-cols-12` — console `lg:col-span-7`, right rail `lg:col-span-5`.
-- Console card: white, `rounded-3xl`, hairline border, soft lavender radial glow. Mode tabs sit on an `#F5F2EE` pill, active tab `bg-[#7657D9] text-white`.
-- Dial: 260-unit SVG, track `#EFEBFC`, progress `#7657D9`, `stroke-width=10`, round caps; centered badge (`#F5F2EE` pill), `text-[56px]` tabular countdown, and `Single-task cadence` caption.
-- Controls: Reset/Skip are `bg-[#F5F2EE]` pills; the primary Start/Pause is `flex-[1.6]`, `bg-[#7657D9]`, `rounded-full`, `shadow-[#7657D9]/25`.
+### H. Focus Timer View (`PomodoroTimer.tsx`)
+- Header: `Focus & Flow State` eyebrow (`text-xs font-bold uppercase tracking-wider text-[#7657D9]`), `Pomodoro Timer` headline, and a status pill (`bg-white border-[#F0EDE8] rounded-full`) with a pulsing dot only while running (`bg-[#7657D9]`; idle `bg-[#D9D3CC]`) plus `Flow Mode Active` / `Flow Paused`, a `|` divider, and `N Streak` in primary with a filled `Flame`.
+- Layout: `grid grid-cols-1 lg:grid-cols-12` — left column `lg:col-span-7` holds `TimerTaskLinker` above `TimerDisplay`; right rail `lg:col-span-5`.
+- Console card: white, `rounded-3xl`, hairline border. Mode tabs sit on an `#FCFAF8` pill, active tab `bg-[#7657D9] text-white`.
+- Dial: SVG ring `r=112`, track `#F0EDE8`, progress `#7657D9`, `stroke-width=12`, round caps; centered `text-5xl sm:text-6xl` mono countdown and a `Session Running` / `Paused` badge (`bg-[#EFEBFC] text-[#7657D9]`).
+- Controls: Reset/Skip are `bg-[#FCFAF8]` pills with border; the primary Start/Pause is `bg-[#7657D9]`, `rounded-full`, `shadow-[#7657D9]/25`.
 - Right rail: 3-up metric tiles (`rounded-2xl`), Sound & Space card (2×4 ambient pills; active `bg-[#E9DDFF] text-[#441F8D]`; 40×24 toggle switches with white knob), and Flow Log timeline (4px dot on a 2px `#F0EDE8` rail, `#FCFAF8` rows).
+- Task linker `Done` button: `bg-[#5D3CBF] hover:bg-[#7657D9]`, disabled at 40% opacity when no task is linked.
 - Ambient FX selection is visual only; no audio assets are bundled.
 
 ---

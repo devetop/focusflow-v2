@@ -39,18 +39,20 @@
 - **Empty States**: Empty lists render a centered card with a lavender icon tile and a context-aware message (adjust filters when filtered/searching, completed tasks appear here on the Completed tab, otherwise prompt adding a task).
 
 ### 3. Focus Timer (`PomodoroTimer.tsx`)
-- **Layout**: "Deep Focus Room" header with live Flow Mode pill (pulsing when running) and computed day streak; two-pane 7/5 grid (focus console + active task on the left; metrics, Sound & Space, and today's flow log on the right).
+- **Layout**: "Focus & Flow State" eyebrow + `Pomodoro Timer` headline, with a live pill showing pulsing dot + `Flow Mode Active` / `Flow Paused` and the computed `N Streak`; two-pane 7/5 grid (task linker above the dial on the left; metrics, Sound & Space, and today's flow log on the right).
 - **Timer Modes**:
   - **Focus**: 25 minutes default work interval.
   - **Short Break**: 5 minutes break.
   - **Long Break**: 15 minutes break.
-- **Focus Console**: Concentric SVG dial (25m focus, 5m short, 15m long) showing Session N of 4, countdown, a 4-segment target cycle meter, and Reset / Start-Pause / Skip controls.
-- **Task Integration**: A task linker (`Dropdown`, shared listbox) plus quick-complete buttons attach the timer to a specific active task and log dedicated focus sessions. With no task selected, the card reads "General Focus Session" and Done is disabled.
-- **Right Rail Metrics**: Today's focus minutes, completed pomodoros (mode `focus` only), and distinct tasks worked in flow, derived from the raw session array.
+- **Focus Console**: Mode tabs (`Focus (25m)` / `Short Break (5m)` / `Long Break (15m)`), a concentric SVG ring with the countdown and a `Session Running` / `Paused` badge, and Reset / Start-Pause / Skip controls.
+- **Task Integration**: A task linker (`Dropdown`, shared listbox) plus a `Done` quick-complete button attach the timer to a specific active task and log dedicated focus sessions. With no task selected, the card reads "General Focus Session" and Done is disabled.
+- **Right Rail Metrics**: Time (today's logged focus minutes plus elapsed minutes of the running focus session, live), Pomos (completed sessions with mode `focus` only), and Tasks in flow (distinct linked tasks), derived from the raw session array.
+- **Streak & Day Rollover**: Streak counts consecutive local days with at least one logged session, counting back from today (or yesterday when today has none). Today's sessions, streak, and metrics roll over at midnight without a reload (30s `now` refresh plus visibility/focus refresh).
 - **Sound & Space**: Ambient FX selector (Mute / Rain / Cafe / White Noise — selection only, no audio playback) and two toggles: Bell chime at session end (Web Audio tone) and Auto-start rest intervals.
 - **Flow Log**: Reverse-chronological list of today's sessions with start–end clock times, duration, mode, and a focus/break icon (capped at 5 rows).
 - **Session Logging**: Completed focus sessions are appended to `localStorage` (`focusflow_sessions_v1`) with task link, duration, mode, and timestamp; the Overview summarises today's totals.
-- **Persisted Timer State**: Mode, remaining seconds, running flag, session count, and linked task are saved under `focusflow_timer_v1`. State calculation is wall-clock based and centralized in `App.tsx`, preserving running status and remaining time across view navigation, browser reloads, and tab throttling (`visibilitychange`). Expired timers process session logging exactly once upon load or reconciliation.
+- **Persisted Timer State**: Mode, remaining seconds, running flag, session count, and linked task are saved under `focusflow_timer_v1`. State calculation is wall-clock based and centralized in `src/hooks/useAppTimer.ts` (`reconcileAndTickState` in `src/utils/timerUtils.ts`), preserving running status and remaining time across view navigation, browser reloads, and tab throttling (`visibilitychange`). Expired timers process session logging exactly once upon load or reconciliation.
+- **Day Keys**: Every "today"/history day key uses local time via `getLocalDateString()`; never UTC slicing.
 
 ### 4. Settings & Data Management (`SettingsView.tsx`)
 - **Profile Details**: Edit the display name used in the Overview greeting. Trimmed, 1–40 characters, defaults to `'Alex'`. Saved immediately to `localStorage` (`focusflow_profile_v1`) with a toast confirmation.

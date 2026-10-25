@@ -22,18 +22,27 @@ src/
 ├── types/
 │   └── index.ts          # Central domain interfaces (Task, Project, FocusSession, TimerState, etc.)
 ├── services/
-│   └── storage.ts        # LocalStorage persistence layer with initial seed data
+│   ├── storage.ts        # storageService facade (localStorage keys + public API)
+│   ├── storageBackup.ts  # Export/import payloads + strict validation
+│   ├── storageSeeds.ts   # Default seed projects, tasks, sessions
+│   ├── storageTaskActions.ts
+│   └── storageValidation.ts
+├── hooks/
+│   ├── useAppTimer.ts    # timerState owner: tick loop, wall-clock reconcile, active-task sync
+│   └── useAppHandlers.ts # Modals, import/delete confirmation, toasts
 ├── utils/
-│   └── date.ts           # Date formatting and comparison utilities (YYYY-MM-DD)
+│   ├── date.ts           # Local-date formatting/comparison helpers (YYYY-MM-DD)
+│   ├── timerUtils.ts     # MODE_DURATIONS + reconcileAndTickState
+│   └── audio.ts          # Web Audio session chime
 ├── components/
-│   ├── overview/         # Dashboard statistics, productivity metrics, & project summaries
-│   ├── tasks/            # TaskList, TaskItem, and TaskForm components
-│   ├── projects/         # ProjectCard and ProjectForm components
-│   ├── timer/            # PomodoroTimer component
+│   ├── overview/         # OverviewDashboard + HeroProgress / WeeklyChart / FocusCard
+│   ├── tasks/            # TaskList, TaskItem, TaskForm, TaskFormFields
+│   ├── projects/         # ProjectCard and ProjectForm
+│   ├── timer/            # PomodoroTimer (composition only) + TimerDisplay, TimerTaskLinker, TimerSoundLog
 │   ├── settings/         # SettingsView (profile + data backup/restore)
-│   ├── ui/               # Select: styled native <select>; Dropdown: shared accessible listbox
-│   └── layout/           # AppShell, Sidebar, PageHeader, MobileNavigation, Toast, ConfirmDialog
-├── App.tsx               # Root component managing global state, active tab views, & modal state
+│   ├── ui/               # Dropdown: shared accessible listbox; Select: styled native <select> (unused)
+│   └── layout/           # AppShell, Sidebar, PageHeader, MobileNavigation, Toast, ConfirmDialog, AppModalsAndViews
+├── App.tsx               # State owner (data, active view, project filter); renders AppModalsAndViews
 ├── index.css             # Tailwind v4 import & custom CSS variable theme definitions
 └── main.tsx              # React entry point
 ```
@@ -81,10 +90,12 @@ src/
 
 ---
 
-### H. Focus Timer Persistence & Wall-Clock Reconciliation (`PomodoroTimer.tsx` & `App.tsx`)
-- **Centralized Timer State**: `timerState` (`mode`, `timeLeft`, `isRunning`, `totalSessionsCompletedToday`, `activeTaskId`, `lastTickTimestamp`, `chime`, `autoStartRest`) is managed globally in `App.tsx` and persisted in `localStorage` under `focusflow_timer_v1`.
-- **Component Lifecycle Independence**: `PomodoroTimer.tsx` is a view component that receives `savedTimerState` and dispatches action updates (`onSaveTimerState`). Navigating between menu views unmounts `PomodoroTimer` without resetting time, mode, or running status.
-- **Wall-Clock Reconciliation**: On app load, reload, or `visibilitychange` (tab coming to foreground), remaining time is reconciled via real wall-clock delta (`now - lastTickTimestamp`).
+### H. Focus Timer Persistence & Wall-Clock Reconciliation (`useAppTimer.ts`, `timerUtils.ts`, `components/timer/*`)
+- **Centralized Timer State**: `timerState` (`mode`, `timeLeft`, `isRunning`, `totalSessionsCompletedToday`, `activeTaskId`, `lastTickTimestamp`, `chime`, `autoStartRest`) is owned by `src/hooks/useAppTimer.ts` and persisted in `localStorage` under `focusflow_timer_v1`. Do not move this state back into `App.tsx` or a view component.
+- **Component Split**: `PomodoroTimer.tsx` only composes `TimerTaskLinker` (left, above the dial), `TimerDisplay` (dial + controls) and `TimerSoundLog` (metrics, Sound & Space, Flow Log). Timer state arrives as `savedTimerState` and leaves via `onSaveTimerState`.
+- **Component Lifecycle Independence**: Navigating between menu views unmounts `PomodoroTimer` without resetting time, mode, or running status.
+- **Wall-Clock Reconciliation**: `reconcileAndTickState` (`src/utils/timerUtils.ts`) runs on the 1s tick, on app load/reload, and on `visibilitychange`/`focus` (tab coming to foreground), using the real wall-clock delta (`now - lastTickTimestamp`).
+- **Day Rollover & Live Metrics**: `PomodoroTimer` holds a `now` timestamp refreshed every 30s and on visibility/focus; today's sessions and the streak are derived from it, so metrics roll over at midnight without a reload. Streak = consecutive local days with at least one session, counted back from today (or yesterday when today has none). The `Time` metric adds elapsed minutes of the currently running focus session to today's logged focus minutes.
 - **Single-Execution Completion**: Expired timers (`elapsed >= timeLeft`) trigger `handleSessionComplete` exactly ONCE, play chime if enabled, increment session count, transition mode (focus → break; short break after focus, long break every 4 focus sessions), update `focusflow_sessions_v1`, and set next mode time with `isRunning: false` to avoid cascading sessions.
 - **Active Task Sync**: `activeTaskId` is restored to `activeTaskForTimer` only if the task exists in `tasks` and is incomplete (`!task.completed`); otherwise it safely falls back to unlinked state (`undefined`).
 
@@ -110,4 +121,6 @@ src/
    - Never delete existing components, files, or data schemas without user confirmation.
    - Always verify changes with `npm run build` before finalizing tasks.
    - When a change alters domain behavior or a shared UI contract (`Dropdown`, `Select`, storage schema), update `AGENTS.md`, `PRODUCT.md`, and `DESIGN.md` in the same change so the docs never drift from the code.
+   - Splitting a component or service file is a structural change: update the tree in section 2 and the section that names the component in the same commit.
+6. **Date Handling**: Day keys always come from `getLocalDateString()` (local time). Never derive a day with `toISOString().slice(0, 10)` or `completedAt.startsWith(todayStr)` — those are UTC-based and mislabel sessions around midnight.
    - `agent.yaml` is outside this repository's documentation scope: do not read, update, or include it in consistency checks.
