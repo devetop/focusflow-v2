@@ -33,6 +33,8 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   return (
     <div
       className={`group relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-white rounded-2xl border transition-all duration-200 hover:shadow-md ${
+        showMenu ? 'z-30' : ''
+      } ${
         task.completed
           ? 'border-[#F0EDE8] opacity-65 bg-[#FCFAF8]'
           : 'border-[#F0EDE8] hover:border-[#EAE5E0]'
