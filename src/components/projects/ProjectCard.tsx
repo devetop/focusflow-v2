@@ -23,6 +23,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   const completedTasks = projectTasks.filter((t) => t.completed);
   const totalCount = projectTasks.length;
   const completedCount = completedTasks.length;
+  const pendingCount = projectTasks.length - completedTasks.length;
   const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   return (
@@ -44,7 +45,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
                 {project.name}
               </h3>
               <p className="text-xs text-[#9E98AB]">
-                {totalCount} {totalCount === 1 ? 'task' : 'tasks'}
+                {pendingCount} {pendingCount === 1 ? 'task' : 'tasks'}
               </p>
             </div>
           </div>
