@@ -21,8 +21,8 @@ export function getCurrentHour(): number {
   return new Date().getHours();
 }
 
-export function isDateOverdue(dueDateStr: string, completed: boolean): boolean {
-  if (completed) return false;
+export function isDateOverdue(dueDateStr: string | undefined, completed: boolean): boolean {
+  if (completed || !dueDateStr) return false;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   return new Date(`${dueDateStr}T00:00:00`) < today;

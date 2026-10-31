@@ -41,11 +41,11 @@ export const TaskList: React.FC<TaskListProps> = ({
       if (task.completed) return false;
 
       if (activeTab === 'today') {
-        if (task.dueDate !== todayStr) return false;
+        if (!task.dueDate || task.dueDate !== todayStr) return false;
       } else if (activeTab === 'upcoming') {
-        if (task.dueDate <= todayStr) return false;
+        if (!task.dueDate || task.dueDate <= todayStr) return false;
       } else if (activeTab === 'overdue') {
-        if (task.dueDate >= todayStr) return false;
+        if (!task.dueDate || task.dueDate >= todayStr) return false;
       }
     }
 
@@ -75,6 +75,9 @@ export const TaskList: React.FC<TaskListProps> = ({
     } else if (sortBy === 'createdAt') {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     } else {
+      if (!a.dueDate && !b.dueDate) return 0;
+      if (!a.dueDate) return 1;
+      if (!b.dueDate) return -1;
       return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
     }
   });

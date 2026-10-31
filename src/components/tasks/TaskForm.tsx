@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Task, Project, Priority } from '../../types';
 import { X } from 'lucide-react';
+import { getTodayDateString } from '../../utils/date';
 import type { DropdownOption } from '../ui/Dropdown';
 import { TaskFormFields } from './TaskFormFields';
 
@@ -35,7 +36,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       setTitle(editingTask.title);
       setDescription(editingTask.description || '');
       setPriority(editingTask.priority);
-      setDueDate(editingTask.dueDate);
+      setDueDate(editingTask.dueDate || '');
       setProjectId(editingTask.projectId || '');
       setEstimatedMinutes(editingTask.estimatedMinutes || 25);
       setTagsInput(editingTask.tags ? editingTask.tags.join(', ') : '');
@@ -43,7 +44,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       setTitle('');
       setDescription('');
       setPriority('medium');
-      setDueDate(new Date().toISOString().split('T')[0]);
+      setDueDate(getTodayDateString());
       setProjectId(defaultProjectId || (projects.length > 0 ? projects[0].id : ''));
       setEstimatedMinutes(25);
       setTagsInput('');
@@ -70,7 +71,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         description: description.trim() || undefined,
         completed: editingTask ? editingTask.completed : false,
         priority,
-        dueDate: dueDate || new Date().toISOString().split('T')[0],
+        dueDate: dueDate || undefined,
         projectId: projectId || undefined,
         estimatedMinutes: Number(estimatedMinutes) || 15,
         tags,

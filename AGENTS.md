@@ -53,10 +53,15 @@ src/
 
 ## 3. Core Domain & Business Logic Rules
 
-### A. Task Filtering (`TaskList.tsx`)
+### A. Task Filtering & Due Dates (`TaskList.tsx`, `TaskItem.tsx`, `TaskForm.tsx`)
 - **Active Tabs**: `all`, `today`, `upcoming`, `overdue`, `completed`.
 - **Incompletion Guard**: Tabs `all`, `today`, `upcoming`, and `overdue` **MUST NEVER** display completed tasks (`task.completed === true`).
-- **Completion View**: Tab `completed` **MUST** display all completed tasks regardless of due date.
+- **Completion View**: Tab `completed` **MUST** display all completed tasks regardless of due date (including tasks without a due date).
+- **Due Date Optionality**: `Task.dueDate` is optional (`dueDate?: string`). Tasks can be created and saved without a due date.
+- **Tab Inclusions/Exclusions**:
+  - `today`, `upcoming`, and `overdue` tabs **MUST EXCLUDE** tasks without a due date.
+  - `all` tab **MUST** display tasks without a due date alongside tasks with due dates.
+  - Sorting by due date places tasks without a due date at the very end without producing `NaN`.
 - **Filters & Search**: Search query, project filter, priority filter, and sort options must operate on the tab-filtered subset and **MUST NOT** resurrect completed tasks in non-completed tabs.
 
 ### B. Overview & Project Statistics

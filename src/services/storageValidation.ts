@@ -9,7 +9,7 @@ export function isValidTask(task: unknown): task is Task {
   const { id, title, completed, priority, dueDate, estimatedMinutes, createdAt } = task;
   if (typeof id !== 'string' || typeof title !== 'string' || typeof completed !== 'boolean') return false;
   if (priority !== 'low' && priority !== 'medium' && priority !== 'high') return false;
-  if (typeof dueDate !== 'string' || typeof estimatedMinutes !== 'number' || typeof createdAt !== 'string') return false;
+  if ((dueDate !== undefined && typeof dueDate !== 'string') || typeof estimatedMinutes !== 'number' || typeof createdAt !== 'string') return false;
   return true;
 }
 

@@ -14,7 +14,7 @@ export interface Task {
   description?: string;
   completed: boolean;
   priority: Priority;
-  dueDate: string; // YYYY-MM-DD
+  dueDate?: string; // YYYY-MM-DD
   projectId?: string;
   estimatedMinutes: number;
   createdAt: string; // ISO string

@@ -60,10 +60,24 @@ export const TaskFormFields: React.FC<TaskFormFieldsProps> = ({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-bold text-[#2A2538] uppercase tracking-wider mb-1 flex items-center gap-1">
-            <Calendar className="w-3.5 h-3.5 text-[#7657D9]" />
-            Due Date
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs font-bold text-[#2A2538] uppercase tracking-wider flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5 text-[#7657D9]" />
+              Due Date
+            </label>
+            {dueDate ? (
+              <button
+                type="button"
+                onClick={() => setDueDate('')}
+                className="text-[11px] font-semibold text-[#7657D9] hover:underline"
+                aria-label="Clear due date"
+              >
+                Clear due date
+              </button>
+            ) : (
+              <span className="text-[11px] font-medium text-[#9E98AB]">No due date</span>
+            )}
+          </div>
           <input
             type="date"
             value={dueDate}

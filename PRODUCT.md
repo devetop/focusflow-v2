@@ -27,11 +27,11 @@
 
 ### 2. My Tasks (`TaskList.tsx`, `TaskItem.tsx`, `TaskForm.tsx`)
 - **Filter Tabs**:
-  - **All Tasks**: Shows active incomplete tasks across all due dates.
-  - **Today**: Shows active incomplete tasks due on the current date.
-  - **Upcoming**: Shows active incomplete tasks due in the future.
-  - **Overdue**: Shows active incomplete tasks past their due date.
-  - **Completed**: Shows all completed tasks regardless of date.
+  - **All Tasks**: Shows active incomplete tasks across all due dates, including tasks created without a due date.
+  - **Today**: Shows active incomplete tasks due on the current date (excludes tasks without a due date).
+  - **Upcoming**: Shows active incomplete tasks due in the future (excludes tasks without a due date).
+  - **Overdue**: Shows active incomplete tasks past their due date (excludes tasks without a due date).
+  - **Completed**: Shows all completed tasks regardless of date (including tasks without a due date).
 - **Search & Filtering**: Real-time text search (title, description, tags), project filter dropdown, priority filter dropdown, and multi-field sorting (Due Date, Priority, Creation Date). Pre-filters by project when arriving from a selected project card; navigating directly from sidebar resets project filter to "All Projects".
 - **Contextual Task Creation**: Clicking "Add Task" while in a project-filtered task view automatically pre-selects that project in the task creation form (`defaultProjectId`). Users can still manually change or clear the project dropdown. Opening "Add Task" from Overview, direct "My Tasks" (All Projects), Completed, Projects, or Timer views defaults to the fallback project or unassigned state without leaking the filter. Editing an existing task always preserves the task's assigned project.
 - **Filter Controls**: Task list filters/sort use the shared accessible `Dropdown` listbox (`src/components/ui/Dropdown.tsx`, ARIA + full keyboard support); the `TaskForm` Project field uses the same `Dropdown` with `fullWidth`, and the timer task linker uses the shared `Dropdown`.
@@ -81,7 +81,7 @@ interface Task {
   description?: string;
   completed: boolean;
   priority: 'low' | 'medium' | 'high';
-  dueDate: string;          // Format: YYYY-MM-DD
+  dueDate?: string;         // Optional, format: YYYY-MM-DD
   projectId?: string;
   estimatedMinutes: number;
   createdAt: string;        // ISO string

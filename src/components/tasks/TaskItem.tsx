@@ -28,7 +28,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     high: 'bg-[#FDF0F6] text-[#993766] border-[#F3A6C8]/30',
   };
 
-  const overdue = isDateOverdue(task.dueDate, task.completed);
+  const overdue = Boolean(task.dueDate && isDateOverdue(task.dueDate, task.completed));
 
   return (
     <div
@@ -93,10 +93,12 @@ export const TaskItem: React.FC<TaskItemProps> = ({
               </span>
             )}
 
-            <span className={`flex items-center gap-1 ${overdue ? 'text-[#ba1a1a] font-semibold' : ''}`}>
-              <Calendar className="w-3.5 h-3.5" />
-              {task.dueDate}
-            </span>
+            {task.dueDate && (
+              <span className={`flex items-center gap-1 ${overdue ? 'text-[#ba1a1a] font-semibold' : ''}`}>
+                <Calendar className="w-3.5 h-3.5" />
+                {task.dueDate}
+              </span>
+            )}
 
             {task.estimatedMinutes > 0 && (
               <span className="flex items-center gap-1">
