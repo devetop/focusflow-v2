@@ -66,6 +66,7 @@ src/
 
 ### B. Overview & Project Statistics
 - Do not alter task completed counts calculated in `OverviewDashboard.tsx` or `ProjectCard.tsx` when changing task filter views. Task completion status metrics must remain globally accurate based on raw task arrays.
+- **7-Day Activity Bar Heights**: In `OverviewWeeklyChart.tsx` the bar height is a percentage against its parent, so the height chain MUST stay resolved: chart stack `flex items-stretch ... h-28` → column `flex flex-col ... flex-1 h-full` → wrapper `w-full h-full flex items-end justify-center` → bar `style={{ height: `${Math.max(heightPercent, 12)}%` }}`. Replacing `items-stretch` with `items-end`, or dropping `h-full` from the column, collapses every bar to 0 px (percentage height resolves against an indefinite parent).
 
 ### C. Storage & State Persistence (`storage.ts`)
 - All user modifications (Tasks, Projects, Focus Sessions) persist in `localStorage` under keys `focusflow_tasks_v1`, `focusflow_projects_v1`, `focusflow_sessions_v1`, `focusflow_timer_v1`.

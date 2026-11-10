@@ -21,6 +21,7 @@
 
 ### 1. Overview Dashboard (`OverviewDashboard.tsx`)
 - Today's completion progress with a greeting from the persisted profile name, a 7-day completed-task bar chart, and today's focus task list (up to 4 tasks).
+- **7-Day Activity Chart** (`OverviewWeeklyChart.tsx`): one bar per local day (last 7 days), height proportional to that day's completed-task count against the week's max (minimum 4), floored at 12% so zero days stay visible. Today's bar is `#7657D9`; past days with completions `#9B7AE8` at 60%; zero days `#F0EDE8`. Each bar carries a `title` tooltip (`N tasks completed`) and the card footer totals the week.
 - Focus summary card (total focus minutes and session count for today) linking to the Focus Timer.
 - Active projects preview (first 2) with completion progress bars. Clicking any project card or its "View All Tasks" button navigates to My Tasks pre-filtered to that project's tasks.
 - Every card/stat is computed from the raw task and session arrays, independent of TaskList filter state.

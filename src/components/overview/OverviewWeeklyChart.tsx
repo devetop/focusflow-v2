@@ -29,12 +29,12 @@ export const OverviewWeeklyChart: React.FC<OverviewWeeklyChartProps> = ({
           </span>
         </div>
 
-        <div className="flex items-end justify-between h-28 pt-4 pb-1 px-1">
+        <div className="flex items-stretch justify-between h-28 pt-4 pb-1 px-1">
           {weeklyData.map((d, i) => {
             const maxCount = Math.max(...weeklyData.map((item) => item.count), 4);
             const heightPercent = Math.min(Math.round((d.count / maxCount) * 100), 100);
             return (
-              <div key={i} className="flex flex-col items-center gap-1.5 flex-1">
+              <div key={i} className="flex flex-col items-center gap-1.5 flex-1 h-full">
                 <div className="w-full h-full flex items-end justify-center">
                   <div
                     className={`w-3.5 sm:w-4 rounded-t-lg transition-all ${

@@ -64,6 +64,7 @@ h1, h2, h3, h4, h5, h6 {
 - **Empty States**: Centered white card with `rounded-3xl`, a `w-12 h-12 rounded-full bg-[#EFEBFC] text-[#7657D9]` icon tile, `text-base font-bold` title, and `text-xs text-[#9E98AB] max-w-xs` message.
 - Interactive items feature hover state border transitions (`hover:border-[#7657D9]/30` or similar).
 - **Project Cards**: `ProjectCard.tsx` container is whole-card clickable (`cursor-pointer`) to navigate to My Tasks pre-filtered to that project. Action menus and sub-buttons MUST invoke `e.stopPropagation()` so opening menus or editing/deleting projects never triggers card-level navigation.
+- **7-Day Activity Chart** (`OverviewWeeklyChart.tsx`): stack `flex items-stretch justify-between h-28 pt-4 pb-1 px-1`; each column `flex flex-col items-center gap-1.5 flex-1 h-full` holding a `w-full h-full flex items-end justify-center` wrapper and a `w-3.5 sm:w-4 rounded-t-lg` bar with inline percentage height (floor 12%). Bars: today `bg-[#7657D9]`, past days with completions `bg-[#9B7AE8]/60`, zero days `bg-[#F0EDE8]`. `items-stretch` + `h-full` on the column are required so the percentage resolves; removing either collapses bars to 0 px.
 
 ### C. Buttons & Inputs
 - **Primary Button**: `bg-[#7657D9] hover:bg-[#6645C8] text-white rounded-full text-xs font-bold px-4 py-2.5 transition-all shadow-md shadow-[#7657D9]/20 active:scale-95`
