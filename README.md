@@ -1,32 +1,65 @@
-# React + TypeScript + Vite
+# FocusFlow v2
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+FocusFlow is a local-first productivity dashboard for organizing tasks and projects, running focused Pomodoro sessions, and keeping track of your daily progress.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Overview dashboard** with today's focus totals and project progress.
+- **Task management** with project assignment, filters, completion tracking, and task-linked focus sessions.
+- **Project organization** to group related work and track completion.
+- **Pomodoro timer** with focus, short-break, and long-break modes, session tracking, and timer state preserved across reloads.
+- **Local data storage** so your tasks, projects, timer state, and focus sessions stay in your browser.
+- **JSON workspace backup** to export and restore your productivity data.
 
-## React Compiler
+## Getting started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Requirements
 
-## Expanding the Oxlint configuration
+- Node.js and npm
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+### Run locally
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Vite prints the local development URL in the terminal.
+
+### Available scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the development server |
+| `npm run build` | Type-check and create a production build |
+| `npm run preview` | Preview the production build locally |
+| `npm run lint` | Run Oxlint |
+
+### Run with Docker
+
+```bash
+docker compose up -d --build
+```
+
+Open [http://localhost:8080](http://localhost:8080). To stop the container, run:
+
+```bash
+docker compose down
+```
+
+## Data and privacy
+
+FocusFlow has no application backend or account system. Workspace data is stored in your browser's `localStorage` and is not synchronized between browsers or devices. Use the in-app JSON export regularly to keep a backup. Clearing browser data can remove your workspace.
+
+## Built with
+
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Lucide
+
+## Project documentation
+
+- [Product specification](PRODUCT.md)
+- [Design notes](DESIGN.md)
